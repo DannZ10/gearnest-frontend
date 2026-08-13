@@ -7,13 +7,14 @@ import api from '@/lib/axios';
 import { useAuthStore } from '@/store/useAuthStore';
 import { formatRupiah, formatDate } from '@/lib/format';
 import { toast } from 'sonner';
-import { ShoppingBag, CreditCard, Calendar, Truck, ShieldCheck, ExternalLink, Clock, CheckCircle2, AlertCircle } from 'lucide-react';
+import { ShoppingBag, CreditCard, Calendar, Truck, ShieldCheck, Printer, X, Mountain, CheckCircle2 } from 'lucide-react';
 
 export default function CustomerDashboardPage() {
   const router = useRouter();
   const { user, isAuthenticated } = useAuthStore();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedReceipt, setSelectedReceipt] = useState(null);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -48,6 +49,10 @@ export default function CustomerDashboardPage() {
     }
   };
 
+  const handlePrintReceipt = () => {
+    window.print();
+  };
+
   const getStatusBadge = (status) => {
     switch (status) {
       case 'confirmed':
@@ -70,7 +75,7 @@ export default function CustomerDashboardPage() {
         <div>
           <span className="text-xs font-semibold text-emerald-400">Dashboard Penyewa</span>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-white">Halo, {user?.name}!</h1>
-          <p className="text-xs text-slate-400 mt-1">Pantau status persewaan dan riwayat transaksi sewa gear Anda</p>
+          <p className="text-xs text-slate-400 mt-1">Pantau status persewaan dan cetak nota transaksi sewa gear Anda</p>
         </div>
 
         <Link
@@ -155,21 +160,116 @@ export default function CustomerDashboardPage() {
                 </div>
 
                 {/* Actions Bar */}
-                {booking.status === 'pending' && (
-                  <div className="pt-2 flex justify-end">
+                <div className="pt-2 flex items-center justify-between">
+                  <button
+                    onClick={() => setSelectedReceipt(booking)}
+                    className="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs rounded-xl flex items-center gap-1.5 transition-all border border-slate-700"
+                  >
+                    <Printer className="w-3.5 h-3.5 text-emerald-400" /> Lihat Struk / Nota Sewa
+                  </button>
+
+                  {booking.status === 'pending' && (
                     <button
                       onClick={() => handlePayNow(booking.id)}
                       className="px-4 py-2 bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-bold text-xs rounded-xl flex items-center gap-1.5 transition-all shadow-md shadow-emerald-500/10"
                     >
-                      <CreditCard className="w-3.5 h-3.5" /> Bayar Sekarang (Midtrans Snap)
+                      <CreditCard className="w-3.5 h-3.5" /> Bayar Sekarang (Midtrans)
                     </button>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             ))}
           </div>
         )}
       </div>
+
+      {/* Printable Receipt Modal */}
+      {selectedReceipt && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-lg p-6 sm:p-8 space-y-6 shadow-2xl relative text-slate-200">
+            <button
+              onClick={() => setSelectedReceipt(null)}
+              className="absolute top-4 right-4 p-2 text-slate-400 hover:text-white"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {/* Receipt Content Header */}
+            <div className="text-center space-y-2 border-b border-slate-800 pb-4">
+              <div className="inline-flex items-center gap-2 font-bold text-xl text-emerald-400">
+                <Mountain className="w-6 h-6 text-emerald-400" />
+                <span className="text-white">GearNest</span>
+              </div>
+              <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400">Nota Transaksi Persewaan</h3>
+              <p className="font-mono text-xs text-emerald-400 font-extrabold">{selectedReceipt.booking_code}</p>
+            </div>
+
+            {/* Customer & Period Details */}
+            <div className="grid grid-cols-2 gap-4 text-xs bg-slate-950 p-4 rounded-2xl border border-slate-800">
+              <div>
+                <span className="text-slate-500 block">Penyewa</span>
+                <span className="font-bold text-white">{user?.name}</span>
+              </div>
+              <div>
+                <span className="text-slate-500 block">Tanggal Pemesanan</span>
+                <span className="font-bold text-white">{formatDate(selectedReceipt.created_at)}</span>
+              </div>
+              <div>
+                <span className="text-slate-500 block">Mulai Sewa</span>
+                <span className="font-bold text-white">{formatDate(selectedReceipt.start_date)}</span>
+              </div>
+              <div>
+                <span className="text-slate-500 block">Selesai Sewa</span>
+                <span className="font-bold text-white">{formatDate(selectedReceipt.end_date)}</span>
+              </div>
+            </div>
+
+            {/* Items Table */}
+            <div className="space-y-2">
+              <h4 className="text-xs font-bold text-white uppercase tracking-wider">Rincian Peralatan</h4>
+              <div className="divide-y divide-slate-800 text-xs">
+                {selectedReceipt.items?.map((item) => (
+                  <div key={item.id} className="py-2 flex justify-between items-center">
+                    <div>
+                      <span className="font-semibold text-white">{item.gear?.name}</span>
+                      <span className="text-slate-500 block text-[10px]">
+                        {formatRupiah(item.price_per_day)} x {item.quantity} unit x {selectedReceipt.duration_days} hari
+                      </span>
+                    </div>
+                    <span className="font-bold text-emerald-400">{formatRupiah(item.line_total)}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Pricing Total */}
+            <div className="pt-3 border-t border-slate-800 space-y-1.5 text-xs">
+              <div className="flex justify-between text-slate-400">
+                <span>Subtotal:</span>
+                <span className="font-semibold text-white">{formatRupiah(selectedReceipt.subtotal)}</span>
+              </div>
+              <div className="flex justify-between text-slate-400">
+                <span>Delivery Fee ({selectedReceipt.delivery_type}):</span>
+                <span className="font-semibold text-white">{formatRupiah(selectedReceipt.delivery_fee)}</span>
+              </div>
+              <div className="flex justify-between text-sm font-extrabold text-white pt-2 border-t border-slate-800">
+                <span>Total Pembayaran:</span>
+                <span className="text-emerald-400">{formatRupiah(selectedReceipt.total_price)}</span>
+              </div>
+            </div>
+
+            {/* Print Action */}
+            <div className="pt-4 flex gap-3">
+              <button
+                onClick={handlePrintReceipt}
+                className="w-full py-3 bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-bold text-xs rounded-xl flex items-center justify-center gap-2 transition-all"
+              >
+                <Printer className="w-4 h-4" /> Cetak / Save PDF Nota
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
