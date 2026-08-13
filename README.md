@@ -1,36 +1,92 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ⛰️ GearNest Web — Outdoor Rental Web Application (Frontend)
 
-## Getting Started
+[![Next.js](https://img.shields.io/badge/Next.js-16.x-black?style=for-the-badge&logo=next.js)](https://nextjs.org)
+[![React](https://img.shields.io/badge/React-19.x-61DAFB?style=for-the-badge&logo=react)](https://react.dev)
+[![JavaScript](https://img.shields.io/badge/JavaScript-ES6%2B-F7DF1E?style=for-the-badge&logo=javascript)](https://developer.mozilla.org)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-38BDF8?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com)
+[![Zustand](https://img.shields.io/badge/State-Zustand-orange?style=for-the-badge)](https://github.com/pmndrs/zustand)
 
-First, run the development server:
+**GearNest Web** adalah antarmuka web modern untuk platform sewa perlengkapan outdoor & peralatan gunung. Dibangun menggunakan **Next.js App Router murni JavaScript (`.js` & `.jsx`)**, **Tailwind CSS v4**, **Zustand State Management**, **Axios**, dan integrasi pembayaran otomatis **Midtrans Snap**.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+---
+
+## 🎨 Tampilan & Fitur Utama
+
+- 🏠 **Beranda (Landing Page)**: Hero Banner, 14 Kategori Grid, Katalog Gear Paling Populer, dan Timeline Cara Sewa.
+- 🔍 **Katalog Gear & Filter Real-Time**: Pencarian kata kunci, filter kategori, pengurutan harga/stok, dan paginasi.
+- 🛒 **Keranjang Sewa Dinamis**: Pemilihan tanggal mulai/selesai sewa, kalkulator durasi hari, opsi **Ambil Mandiri (Pickup)** vs **Layanan Antar (Delivery Rp 10.000 + Rp 3.000/km)**, manajemen kuantitas gear, dan rincian biaya.
+- 💳 **Checkout & Midtrans Integration**: Ringkasan penyewa, persetujuan jaminan identitas KTP/SIM, catatan khusus, dan peluncuran pembayaran instan via Midtrans Snap.
+- 📋 **Dashboard Customer**: Riwayat booking sewa, indikator status (`pending`, `confirmed`, `active`, `returned`, `cancelled`), dan tombol bayar ulang.
+- 🛡️ **Dashboard Admin Control Panel**: Ringkasan omset & statistik, peringatan stok menipis (≤ 3 unit), ranking gear terpopuler, pengubah status booking, dan toggle verifikasi identitas jaminan.
+
+---
+
+## 📁 Struktur Proyek (JavaScript `.js` / `.jsx`)
+
+```text
+gearnest-web/
+├── public/                # Static assets & logos
+├── src/
+│   ├── app/               # Next.js App Router Pages
+│   │   ├── admin/dashboard/page.jsx  # Admin Control Panel
+│   │   ├── cart/page.jsx             # Keranjang Sewa & Delivery
+│   │   ├── categories/page.jsx       # 14 Kategori Grid
+│   │   ├── checkout/page.jsx         # Konfirmasi & Midtrans Trigger
+│   │   ├── dashboard/page.jsx        # Customer My Bookings
+│   │   ├── gears/page.jsx            # Katalog & Filter Search
+│   │   ├── login/page.jsx            # Portal Masuk (Demobox)
+│   │   ├── register/page.jsx         # Portal Daftar
+│   │   ├── layout.jsx                # Root Layout (Nav, Footer, Toast)
+│   │   └── page.jsx                  # Home Landing Page
+│   ├── components/        # Reusable UI Components
+│   │   ├── Navbar.jsx
+│   │   └── Footer.jsx
+│   ├── lib/               # Utilities & Axios API Client
+│   │   ├── axios.js
+│   │   └── format.js
+│   └── store/             # Zustand State Management Stores
+│       ├── useAuthStore.js
+│       └── useCartStore.js
+├── jsconfig.json          # Path alias configuration (@/*)
+├── package.json           # Dependencies & Scripts
+└── tailwind.config.js     # Styling tokens & design system
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🚀 Panduan Instalasi & Menjalankan Lokal
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Prerequisites
+- Node.js >= 18.x
+- npm >= 9.x
 
-## Learn More
+### 1. Clone & Install Dependencies
+```bash
+git clone https://github.com/DannZ10/gearnest-frontend.git gearnest-web
+cd gearnest-web
+npm install
+```
 
-To learn more about Next.js, take a look at the following resources:
+### 2. Konfigurasi Environment File (`.env.local`)
+Buat file `.env.local` di root folder `gearnest-web`:
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8000/api
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 3. Menjalankan Server Development
+```bash
+npm run dev
+```
+Buka browser di: `http://localhost:3000`
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 4. Membangun Production Bundle (Build Check)
+```bash
+npm run build
+```
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🔑 Kredensial Demo Cepat
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Admin Account**: `admin@gearnest.com` / `admin123`
+- **Customer Account**: `customer@gearnest.com` / `customer123`
