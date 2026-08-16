@@ -5,7 +5,10 @@ import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useCartStore } from '@/store/useCartStore';
-import { ShoppingBag, User as UserIcon, LogOut, Shield, Menu, X, Mountain, ArrowRight } from 'lucide-react';
+import BrandMark from '@/components/atoms/BrandMark';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { ShoppingBag, User as UserIcon, LogOut, Shield, Menu, X, ArrowRight } from 'lucide-react';
 
 const NAV_LINKS = [
   { href: '/', label: 'Beranda' },
@@ -14,23 +17,7 @@ const NAV_LINKS = [
   { href: '/about', label: 'Cara Sewa' },
 ];
 
-function BrandMark() {
-  return (
-    <Link href="/" className="flex items-center gap-2.5 group">
-      <span className="grid place-items-center w-10 h-10 rounded-xl bg-ink text-ember shadow-sm transition-transform group-hover:-translate-y-0.5">
-        <Mountain className="w-5 h-5" strokeWidth={2.5} />
-      </span>
-      <span className="leading-none">
-        <span className="font-display font-bold text-xl tracking-wide text-ink block">
-          GEAR<span className="text-ember">NEST</span>
-        </span>
-        <span className="text-[9px] font-semibold tracking-[0.18em] text-moss uppercase">
-          Rent. Gear Up. Get Out.
-        </span>
-      </span>
-    </Link>
-  );
-}
+
 
 export default function Navbar() {
   const router = useRouter();
@@ -66,7 +53,7 @@ export default function Navbar() {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-18 py-3">
-          <BrandMark />
+          <BrandMark showTagline />
 
           {/* Desktop nav */}
           <nav className="hidden md:flex items-center gap-8 text-sm font-semibold text-ink/70">
@@ -108,9 +95,9 @@ export default function Navbar() {
                 >
                   <span className="font-semibold max-w-[120px] truncate text-ink">{user?.name || 'Akun'}</span>
                   {role === 'admin' && (
-                    <span className="bg-ember/15 text-ember-2 text-[10px] font-bold px-1.5 py-0.5 rounded border border-ember/30">
+                    <Badge variant="warning">
                       ADMIN
-                    </span>
+                    </Badge>
                   )}
                   <UserIcon className="w-4 h-4 text-moss" />
                 </button>
@@ -156,19 +143,15 @@ export default function Navbar() {
               </div>
             ) : (
               <div className="hidden sm:flex items-center gap-2">
-                <Link
-                  href="/login"
-                  className="px-4 py-2.5 text-sm font-semibold text-ink/70 hover:text-ink transition-all"
-                >
-                  Masuk
-                </Link>
-                <Link
-                  href="/gears"
-                  className="group inline-flex items-center gap-1.5 px-5 py-2.5 text-sm font-display font-semibold uppercase tracking-wide text-white bg-ember hover:bg-ember-2 rounded-xl shadow-lg shadow-ember/25 transition-all"
-                >
-                  Sewa Sekarang
-                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
-                </Link>
+                <Button variant="ghost" asChild>
+                  <Link href="/login">Masuk</Link>
+                </Button>
+                <Button size="sm" asChild>
+                  <Link href="/gears" className="group">
+                    Sewa Sekarang
+                    <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+                  </Link>
+                </Button>
               </div>
             )}
 

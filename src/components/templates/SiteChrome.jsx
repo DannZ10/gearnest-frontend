@@ -2,8 +2,8 @@
 
 import React from 'react';
 import { usePathname } from 'next/navigation';
-import Navbar from './Navbar';
-import Footer from './Footer';
+import Navbar from '@/components/organisms/Navbar';
+import Footer from '@/components/organisms/Footer';
 
 /**
  * The public navbar/footer are hidden on /admin/* — the admin area runs its

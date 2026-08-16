@@ -6,12 +6,16 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import api from '@/lib/axios';
 import { useAuthStore } from '@/store/useAuthStore';
 import { toast } from 'sonner';
-import { Mountain, Mail, Lock, Loader2, Shield } from 'lucide-react';
+import BrandMark from '@/components/atoms/BrandMark';
+import FormField from '@/components/molecules/FormField';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Mail, Lock, Loader2, Shield, ArrowLeft } from 'lucide-react';
 
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirect = searchParams.get('redirect') || '/account';
+  const redirect = searchParams.get('redirect') || '/';
   const setAuth = useAuthStore((state) => state.setAuth);
 
   const [email, setEmail] = useState('');
@@ -36,64 +40,79 @@ function LoginForm() {
   };
 
   return (
-    <div className="w-full max-w-md bg-white border border-ink/10 rounded-3xl p-8 shadow-xl shadow-ink/5 space-y-6">
-      <div className="text-center space-y-2">
-        <Link href="/" className="inline-flex items-center gap-2 font-display font-bold text-2xl">
-          <span className="grid place-items-center w-10 h-10 rounded-xl bg-ink text-ember">
-            <Mountain className="w-5 h-5" strokeWidth={2.5} />
+    <div className="min-h-screen grid lg:grid-cols-2 bg-ink text-white">
+      {/* Brand panel */}
+      <div className="relative hidden lg:flex flex-col justify-between p-12 gn-topo overflow-hidden">
+        <div className="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-ember/20 blur-3xl" />
+        <BrandMark dark />
+
+        <div className="relative">
+          <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-moss/40 border border-white/10 text-[11px] font-display font-semibold uppercase tracking-[0.15em]">
+            <Shield className="w-3.5 h-3.5 text-ember" /> Outdoor Gear Rental
           </span>
-          <span className="text-ink tracking-wide">GEAR<span className="text-ember">NEST</span></span>
-        </Link>
-        <h2 className="font-display font-bold uppercase text-xl text-ink pt-2">Masuk ke Akun</h2>
-        <p className="text-xs text-ink/55">Kelola booking sewa alat outdoor-mu dengan mudah</p>
+          <h1 className="mt-5 font-display font-bold uppercase leading-[0.95] tracking-tight" style={{ fontSize: 'clamp(2.5rem, 4vw, 4rem)' }}>
+            Siap untuk<br /><span className="text-ember">Petualangan?</span>
+          </h1>
+          <p className="mt-4 text-sand/80 max-w-sm text-sm">
+            Sewa alat outdoor premium untuk pendakian, camping, dan petualangan alam lainnya.
+          </p>
+        </div>
+
+        <p className="relative font-display text-xs uppercase tracking-[0.2em] text-sand/50">
+          Your Gear. Your Nest. Your Adventure.
+        </p>
       </div>
 
-      <form onSubmit={handleLogin} className="space-y-4">
-        <Field icon={Mail} label="Email">
-          <input
-            type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
-            placeholder="nama@email.com"
-            className="w-full bg-bone border border-ink/15 rounded-xl pl-10 pr-4 py-2.5 text-sm text-ink focus:outline-none focus:border-ember"
-          />
-        </Field>
-        <Field icon={Lock} label="Password">
-          <input
-            type="password" required value={password} onChange={(e) => setPassword(e.target.value)}
-            placeholder="••••••••"
-            className="w-full bg-bone border border-ink/15 rounded-xl pl-10 pr-4 py-2.5 text-sm text-ink focus:outline-none focus:border-ember"
-          />
-        </Field>
+      {/* Form panel */}
+      <div className="flex items-center justify-center p-6 sm:p-12 bg-bone text-ink">
+        <div className="w-full max-w-sm space-y-8">
+          <Link href="/" className="lg:hidden inline-flex items-center gap-2 text-sm text-ink/60 hover:text-ember">
+            <ArrowLeft className="w-4 h-4" /> Kembali ke situs
+          </Link>
 
-        <button
-          type="submit" disabled={loading}
-          className="w-full py-3 bg-ember hover:bg-ember-2 text-white font-display font-semibold uppercase tracking-wide rounded-xl shadow-lg shadow-ember/25 transition-all flex items-center justify-center gap-2 text-sm disabled:opacity-50"
-        >
-          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Masuk Sekarang'}
-        </button>
-      </form>
+          <div>
+            <h2 className="font-display font-bold uppercase text-3xl tracking-tight text-ink">Masuk ke Akun</h2>
+            <p className="text-sm text-ink/60 mt-1">Kelola booking sewa alat outdoor-mu dengan mudah</p>
+          </div>
 
-      <p className="text-center text-xs text-ink/55">
-        Belum punya akun?{' '}
-        <Link href="/register" className="font-semibold text-ember-2 hover:underline">Daftar Sekarang</Link>
-      </p>
+          <form onSubmit={handleLogin} className="space-y-4">
+            <FormField icon={Mail} label="Email">
+              <Input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="nama@email.com"
+                className="pl-10 bg-white"
+              />
+            </FormField>
+            <FormField icon={Lock} label="Password">
+              <Input
+                type="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                className="pl-10 bg-white"
+              />
+            </FormField>
 
-      <Link
-        href="/admin/login"
-        className="flex items-center justify-center gap-2 text-xs font-medium text-ink/50 hover:text-ink pt-2 border-t border-ink/10"
-      >
-        <Shield className="w-3.5 h-3.5" /> Masuk sebagai Admin
-      </Link>
-    </div>
-  );
-}
+            <Button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-ink hover:bg-ink-2"
+            >
+              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Masuk Sekarang'}
+            </Button>
+          </form>
 
-function Field({ icon: Icon, label, children }) {
-  return (
-    <div>
-      <label className="block text-xs font-semibold text-ink/70 mb-1.5">{label}</label>
-      <div className="relative">
-        <Icon className="w-4 h-4 absolute left-3.5 top-3.5 text-ink/40" />
-        {children}
+          <p className="text-center text-xs text-ink/50">
+            Belum punya akun?{' '}
+            <Link href="/register" className="font-semibold text-ember-2 hover:underline">
+              Daftar Sekarang
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );
@@ -101,10 +120,8 @@ function Field({ icon: Icon, label, children }) {
 
 export default function LoginPage() {
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
-      <Suspense fallback={<div className="text-ink/50 text-sm">Memuat form login...</div>}>
-        <LoginForm />
-      </Suspense>
-    </div>
+    <Suspense fallback={<div className="min-h-screen grid place-items-center bg-bone text-ink/50 text-sm">Memuat form login...</div>}>
+      <LoginForm />
+    </Suspense>
   );
 }

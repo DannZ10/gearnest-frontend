@@ -7,7 +7,7 @@ import {
 } from 'recharts';
 import api from '@/lib/axios';
 import { formatRupiah } from '@/lib/format';
-import { useAdminTheme } from '@/components/AdminShell';
+import { useAdminTheme } from '@/components/organisms/AdminShell';
 import { BarChart3 } from 'lucide-react';
 
 const INK = '#1e2a32';

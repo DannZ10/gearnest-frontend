@@ -6,7 +6,7 @@ import api from '@/lib/axios';
 import { useAuthStore } from '@/store/useAuthStore';
 import { formatRupiah, formatDate } from '@/lib/format';
 import { toast } from 'sonner';
-import RequireAuth from '@/components/RequireAuth';
+import RequireAuth from '@/components/templates/RequireAuth';
 import { ShoppingBag, CreditCard, Printer, X, Mountain } from 'lucide-react';
 
 function StatusBadge({ status }) {

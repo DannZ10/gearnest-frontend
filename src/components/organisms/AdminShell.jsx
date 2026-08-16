@@ -3,10 +3,11 @@
 import React, { useState, useEffect, createContext, useContext } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import RequireAuth from '@/components/RequireAuth';
+import RequireAuth from '@/components/templates/RequireAuth';
+import BrandMark from '@/components/atoms/BrandMark';
 import { useAuthStore } from '@/store/useAuthStore';
 import {
-  Mountain, LayoutDashboard, CalendarCheck, AlertTriangle, TrendingUp,
+  LayoutDashboard, CalendarCheck, AlertTriangle, TrendingUp,
   ExternalLink, LogOut, Shield, Menu, BarChart3, Sun, Moon,
 } from 'lucide-react';
 
@@ -25,15 +26,7 @@ function SidebarInner({ user, onLogout, onNavigate }) {
   return (
     <>
       <div className="flex items-center gap-2.5 px-5 h-18 border-b border-white/10">
-        <span className="grid place-items-center w-9 h-9 rounded-xl bg-ember text-ink">
-          <Mountain className="w-5 h-5" strokeWidth={2.5} />
-        </span>
-        <div className="leading-none">
-          <span className="font-display font-bold text-lg tracking-wide text-white block">
-            GEAR<span className="text-ember">NEST</span>
-          </span>
-          <span className="text-[9px] font-semibold tracking-[0.18em] text-ember uppercase">Admin Panel</span>
-        </div>
+        <BrandMark dark />
       </div>
 
       <nav className="flex-1 px-3 py-5 space-y-1">
@@ -96,7 +89,7 @@ export default function AdminShell({ title = 'Dashboard', children }) {
 
   const handleLogout = () => {
     logout();
-    router.push('/admin/login');
+    router.push('/login');
   };
 
   return (

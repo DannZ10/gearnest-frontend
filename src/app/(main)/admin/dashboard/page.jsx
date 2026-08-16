@@ -4,24 +4,15 @@ import React, { useEffect, useState } from 'react';
 import api from '@/lib/axios';
 import { formatRupiah, formatDate } from '@/lib/format';
 import { toast } from 'sonner';
-import AdminShell from '@/components/AdminShell';
-import AnalyticsCharts from '@/components/admin/AnalyticsCharts';
+import AdminShell from '@/components/organisms/AdminShell';
+import AnalyticsCharts from '@/components/organisms/AnalyticsCharts';
+import StatCard from '@/components/molecules/StatCard';
 import { Package, ShoppingBag, DollarSign, AlertTriangle, TrendingUp } from 'lucide-react';
 
 const CARD = 'bg-white dark:bg-[#1b2228] border border-ink/10 dark:border-white/10 rounded-3xl';
 const SKEL = 'bg-bone-2 dark:bg-white/5 animate-pulse';
 
-function StatCard({ icon: Icon, label, value, accent }) {
-  return (
-    <div className={`${CARD} p-6 space-y-2`}>
-      <div className="flex items-center justify-between text-ink/50 dark:text-sand/60">
-        <span className="text-xs font-semibold uppercase tracking-wide">{label}</span>
-        <Icon className={`w-5 h-5 ${accent}`} />
-      </div>
-      <p className="font-display font-bold text-3xl text-ink dark:text-white">{value}</p>
-    </div>
-  );
-}
+
 
 function ListSkeleton() {
   return (

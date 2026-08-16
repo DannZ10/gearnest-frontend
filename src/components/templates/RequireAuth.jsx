@@ -7,7 +7,7 @@ import { Loader2 } from 'lucide-react';
 
 /**
  * Client-side route guard.
- * - Not logged in                 -> /login  (or /admin/login when admin)
+ * - Not logged in                 -> /login
  * - Admin guard, but not admin     -> /account
  * - Customer guard, but is admin   -> /admin/dashboard  (admins stay in the admin area)
  *
@@ -30,7 +30,7 @@ export default function RequireAuth({ admin = false, children }) {
   useEffect(() => {
     if (!hydrated) return;
     if (!token) {
-      router.replace(admin ? '/admin/login' : '/login');
+      router.replace('/login');
       return;
     }
     if (admin && role !== 'admin') {
