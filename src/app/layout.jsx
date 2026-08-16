@@ -1,25 +1,30 @@
 import React from 'react';
-import { Inter } from 'next/font/google';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
+import { Inter, Oswald } from 'next/font/google';
+import { SiteHeader, SiteFooter } from '@/components/SiteChrome';
 import { Toaster } from 'sonner';
 import './globals.css';
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
+const oswald = Oswald({
+  subsets: ['latin'],
+  weight: ['500', '600', '700'],
+  variable: '--font-oswald',
+});
 
 export const metadata = {
-  title: 'GearNest — Sistem Rental Alat Outdoor & Peralatan Gunung',
-  description: 'Sewa tenda, carrier, sleeping bag, kompor, dan perlengkapan gunung terlengkap dengan pengiriman cepat & pembayaran otomatis.',
+  title: 'GearNest — Sewa Alat Outdoor & Perlengkapan Gunung',
+  description:
+    'Basecamp-mu untuk gear terawat dan petualangan tak terlupakan. Sewa tenda, carrier, sleeping bag, dan perlengkapan gunung dengan pembayaran otomatis.',
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="id" className="dark">
-      <body className={`${inter.className} bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased`}>
-        <Navbar />
-        <main className="flex-grow">{children}</main>
-        <Footer />
-        <Toaster position="bottom-right" theme="dark" richColors />
+    <html lang="id" className={`${inter.variable} ${oswald.variable}`}>
+      <body className="bg-bone text-ink min-h-screen flex flex-col antialiased">
+        <SiteHeader />
+        <main className="flex-grow flex flex-col">{children}</main>
+        <SiteFooter />
+        <Toaster position="bottom-right" richColors />
       </body>
     </html>
   );

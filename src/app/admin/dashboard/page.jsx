@@ -1,30 +1,52 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import api from '@/lib/axios';
-import { useAuthStore } from '@/store/useAuthStore';
 import { formatRupiah, formatDate } from '@/lib/format';
 import { toast } from 'sonner';
-import { Shield, Package, ShoppingBag, DollarSign, AlertTriangle, TrendingUp, CheckCircle, XCircle, Search } from 'lucide-react';
+import AdminShell from '@/components/AdminShell';
+import AnalyticsCharts from '@/components/admin/AnalyticsCharts';
+import { Package, ShoppingBag, DollarSign, AlertTriangle, TrendingUp } from 'lucide-react';
 
-export default function AdminDashboardPage() {
-  const router = useRouter();
-  const { user, role, isAuthenticated } = useAuthStore();
+const CARD = 'bg-white dark:bg-[#1b2228] border border-ink/10 dark:border-white/10 rounded-3xl';
+const SKEL = 'bg-bone-2 dark:bg-white/5 animate-pulse';
 
+function StatCard({ icon: Icon, label, value, accent }) {
+  return (
+    <div className={`${CARD} p-6 space-y-2`}>
+      <div className="flex items-center justify-between text-ink/50 dark:text-sand/60">
+        <span className="text-xs font-semibold uppercase tracking-wide">{label}</span>
+        <Icon className={`w-5 h-5 ${accent}`} />
+      </div>
+      <p className="font-display font-bold text-3xl text-ink dark:text-white">{value}</p>
+    </div>
+  );
+}
+
+function ListSkeleton() {
+  return (
+    <div className={`${CARD} p-6 space-y-4`}>
+      <div className={`${SKEL} h-5 w-40 rounded`} />
+      <div className="space-y-3">
+        {[...Array(4)].map((_, i) => <div key={i} className={`${SKEL} h-10 rounded-xl`} />)}
+      </div>
+    </div>
+  );
+}
+
+function AdminDashboard() {
   const [summary, setSummary] = useState(null);
   const [popularGears, setPopularGears] = useState([]);
   const [lowStockGears, setLowStockGears] = useState([]);
   const [adminBookings, setAdminBookings] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (!isAuthenticated || role !== 'admin') {
-      toast.error('Akses ditolak. Perlu hak akses Admin.');
-      router.push('/dashboard');
-      return;
-    }
+  const refreshBookings = async () => {
+    const bookRes = await api.get('/admin/bookings');
+    setAdminBookings(bookRes.data.data || []);
+  };
 
+  useEffect(() => {
     async function fetchAdminData() {
       try {
         const [sumRes, popRes, lowRes, bookRes] = await Promise.all([
@@ -33,29 +55,25 @@ export default function AdminDashboardPage() {
           api.get('/admin/reports/low-stock'),
           api.get('/admin/bookings'),
         ]);
-
         setSummary(sumRes.data.data || null);
         setPopularGears(popRes.data.data || []);
         setLowStockGears(lowRes.data.data || []);
         setAdminBookings(bookRes.data.data || []);
       } catch (err) {
         console.error('Failed fetching admin data:', err);
+        toast.error('Gagal memuat data admin.');
       } finally {
         setLoading(false);
       }
     }
-
     fetchAdminData();
-  }, [isAuthenticated, role, router]);
+  }, []);
 
   const handleUpdateStatus = async (bookingId, newStatus) => {
     try {
       await api.patch(`/admin/bookings/${bookingId}/status`, { status: newStatus });
-      toast.success(`Status booking #${bookingId} diubah menjadi ${newStatus}!`);
-
-      // Refresh bookings
-      const bookRes = await api.get('/admin/bookings');
-      setAdminBookings(bookRes.data.data || []);
+      toast.success(`Status booking diubah menjadi ${newStatus}.`);
+      await refreshBookings();
     } catch (err) {
       toast.error(err.response?.data?.message || 'Gagal mengubah status booking.');
     }
@@ -64,173 +82,159 @@ export default function AdminDashboardPage() {
   const handleToggleVerifyIdentity = async (bookingId, currentVerified) => {
     try {
       await api.patch(`/admin/bookings/${bookingId}/verify`, { verified: !currentVerified });
-      toast.success(`Jaminan identitas booking #${bookingId} diperbarui!`);
-
-      // Refresh bookings
-      const bookRes = await api.get('/admin/bookings');
-      setAdminBookings(bookRes.data.data || []);
+      toast.success('Jaminan identitas diperbarui.');
+      await refreshBookings();
     } catch (err) {
       toast.error('Gagal memperbarui verifikasi identitas.');
     }
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
-      {/* Header */}
-      <div className="flex items-center justify-between border-b border-slate-800 pb-6">
-        <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-bold mb-2">
-            <Shield className="w-3.5 h-3.5" /> Admin Control Center
-          </div>
-          <h1 className="text-3xl font-extrabold text-white tracking-tight">Manajemen & Laporan GearNest</h1>
-        </div>
-      </div>
-
-      {/* Summary Analytics Cards */}
-      {summary && (
+    <div className="max-w-6xl mx-auto space-y-10">
+      {/* Ringkasan */}
+      <section id="ringkasan" className="scroll-mt-20 space-y-4">
+        <h2 className="font-display font-bold uppercase text-ink dark:text-white text-lg">Ringkasan</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="bg-slate-900/80 border border-slate-800 p-6 rounded-3xl space-y-2">
-            <div className="flex items-center justify-between text-slate-400">
-              <span className="text-xs font-semibold">Total Pendapatan</span>
-              <DollarSign className="w-5 h-5 text-emerald-400" />
-            </div>
-            <p className="text-2xl font-black text-emerald-400">{formatRupiah(summary.total_revenue)}</p>
-          </div>
+          {loading || !summary ? (
+            [...Array(4)].map((_, i) => <div key={i} className={`${SKEL} h-28 rounded-3xl`} />)
+          ) : (
+            <>
+              <StatCard icon={DollarSign} accent="text-ember" label="Total Pendapatan" value={formatRupiah(summary.total_revenue)} />
+              <StatCard icon={ShoppingBag} accent="text-moss" label="Total Booking" value={summary.total_bookings} />
+              <StatCard icon={TrendingUp} accent="text-ember" label="Sewa Aktif" value={summary.active_rentals} />
+              <StatCard icon={Package} accent="text-bark" label="Total Gear" value={summary.total_gears} />
+            </>
+          )}
+        </div>
+      </section>
 
-          <div className="bg-slate-900/80 border border-slate-800 p-6 rounded-3xl space-y-2">
-            <div className="flex items-center justify-between text-slate-400">
-              <span className="text-xs font-semibold">Total Transaksi Booking</span>
-              <ShoppingBag className="w-5 h-5 text-blue-400" />
-            </div>
-            <p className="text-2xl font-black text-white">{summary.total_bookings} Booking</p>
-          </div>
+      {/* Analitik */}
+      <section id="analitik" className="scroll-mt-20 space-y-4">
+        <h2 className="font-display font-bold uppercase text-ink dark:text-white text-lg">Analitik Bisnis</h2>
+        <AnalyticsCharts />
+      </section>
 
-          <div className="bg-slate-900/80 border border-slate-800 p-6 rounded-3xl space-y-2">
-            <div className="flex items-center justify-between text-slate-400">
-              <span className="text-xs font-semibold">Sewa Aktif Berjalan</span>
-              <TrendingUp className="w-5 h-5 text-amber-400" />
-            </div>
-            <p className="text-2xl font-black text-amber-400">{summary.active_rentals} Unit</p>
-          </div>
+      {/* Stok + Populer */}
+      {loading ? (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8"><ListSkeleton /><ListSkeleton /></div>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <section id="stok" className={`scroll-mt-20 ${CARD} p-6 space-y-4`}>
+            <h3 className="font-display font-bold uppercase text-ink dark:text-white text-base flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-ember" /> Stok Menipis (≤ 3 Unit)
+            </h3>
+            {lowStockGears.length === 0 ? (
+              <p className="text-xs text-ink/55 dark:text-sand/60">Semua stok gear dalam kondisi aman.</p>
+            ) : (
+              <div className="divide-y divide-ink/10 dark:divide-white/10 text-xs">
+                {lowStockGears.map((gear) => (
+                  <div key={gear.id} className="py-3 flex items-center justify-between">
+                    <div>
+                      <h4 className="font-semibold text-ink dark:text-white">{gear.name}</h4>
+                      <span className="text-[10px] text-ink/50 dark:text-sand/50">{gear.category?.name}</span>
+                    </div>
+                    <span className="bg-red-500/10 text-red-600 dark:text-red-400 font-bold px-2.5 py-1 rounded-full border border-red-500/20">
+                      Sisa: {gear.stock_available}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
 
-          <div className="bg-slate-900/80 border border-slate-800 p-6 rounded-3xl space-y-2">
-            <div className="flex items-center justify-between text-slate-400">
-              <span className="text-xs font-semibold">Total Katalog Gear</span>
-              <Package className="w-5 h-5 text-purple-400" />
-            </div>
-            <p className="text-2xl font-black text-white">{summary.total_gears} Item</p>
-          </div>
+          <section id="populer" className={`scroll-mt-20 ${CARD} p-6 space-y-4`}>
+            <h3 className="font-display font-bold uppercase text-ink dark:text-white text-base flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-moss" /> Gear Paling Populer
+            </h3>
+            {popularGears.length === 0 ? (
+              <p className="text-xs text-ink/55 dark:text-sand/60">Belum ada data penyewaan.</p>
+            ) : (
+              <div className="divide-y divide-ink/10 dark:divide-white/10 text-xs">
+                {popularGears.map((item) => (
+                  <div key={item.gear_id} className="py-3 flex items-center justify-between">
+                    <div>
+                      <h4 className="font-semibold text-ink dark:text-white">{item.gear?.name || `Gear #${item.gear_id}`}</h4>
+                      <span className="text-[10px] text-ink/50 dark:text-sand/50">Disewa {item.total_rented} kali</span>
+                    </div>
+                    <span className="font-display font-bold text-ember-2 dark:text-ember">{formatRupiah(item.total_revenue)}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
         </div>
       )}
 
-      {/* Two Column Layout: Low Stock Warning & Popular Gears */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Low Stock Warning */}
-        <div className="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 space-y-4">
-          <h3 className="font-bold text-white text-base flex items-center gap-2">
-            <AlertTriangle className="w-5 h-5 text-amber-400" /> Peringatan Stok Menipis (≤ 3 Unit)
-          </h3>
-
-          {lowStockGears.length === 0 ? (
-            <p className="text-xs text-slate-400">Semua stok gear dalam kondisi aman.</p>
-          ) : (
-            <div className="divide-y divide-slate-800/80 text-xs">
-              {lowStockGears.map((gear) => (
-                <div key={gear.id} className="py-3 flex items-center justify-between">
-                  <div>
-                    <h4 className="font-bold text-white">{gear.name}</h4>
-                    <span className="text-[10px] text-slate-400">{gear.category?.name}</span>
-                  </div>
-                  <span className="bg-rose-500/20 text-rose-400 font-bold px-2.5 py-1 rounded-full border border-rose-500/30">
-                    Sisa Stok: {gear.stock_available}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Popular Gears */}
-        <div className="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 space-y-4">
-          <h3 className="font-bold text-white text-base flex items-center gap-2">
-            <TrendingUp className="w-5 h-5 text-emerald-400" /> Top Gear Paling Sering Disewa
-          </h3>
-
-          <div className="divide-y divide-slate-800/80 text-xs">
-            {popularGears.map((item) => (
-              <div key={item.gear_id} className="py-3 flex items-center justify-between">
-                <div>
-                  <h4 className="font-bold text-white">{item.gear?.name || `Gear #${item.gear_id}`}</h4>
-                  <span className="text-[10px] text-slate-400">Total Disewa: {item.total_rented} kali</span>
-                </div>
-                <span className="font-extrabold text-emerald-400">
-                  {formatRupiah(item.total_revenue)}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Admin Booking Management Table */}
-      <div className="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 space-y-6">
-        <h3 className="font-bold text-white text-lg">Kelola Transaksi Booking Penyewa</h3>
-
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-slate-300">
-            <thead className="bg-slate-950 text-slate-400 font-semibold uppercase border-b border-slate-800">
-              <tr>
-                <th className="p-3">Kode Booking</th>
-                <th className="p-3">Penyewa</th>
-                <th className="p-3">Periode</th>
-                <th className="p-3">Total Harga</th>
-                <th className="p-3">Jaminan ID</th>
-                <th className="p-3">Status</th>
-                <th className="p-3 text-right">Aksi Admin</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-800/80">
-              {adminBookings.map((b) => (
-                <tr key={b.id} className="hover:bg-slate-800/40">
-                  <td className="p-3 font-mono font-bold text-white">{b.booking_code}</td>
-                  <td className="p-3">
-                    <p className="font-semibold text-white">{b.user?.name}</p>
-                    <p className="text-[10px] text-slate-400">{b.user?.email}</p>
-                  </td>
-                  <td className="p-3">{formatDate(b.start_date)} - {formatDate(b.end_date)}</td>
-                  <td className="p-3 font-bold text-emerald-400">{formatRupiah(b.total_price)}</td>
-                  <td className="p-3">
-                    <button
-                      onClick={() => handleToggleVerifyIdentity(b.id, b.identity_verified)}
-                      className={`px-2 py-1 rounded text-[10px] font-bold ${
-                        b.identity_verified
-                          ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                          : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-                      }`}
-                    >
-                      {b.identity_verified ? 'Terverifikasi ✓' : 'Belum Verifikasi ⚠'}
-                    </button>
-                  </td>
-                  <td className="p-3 font-extrabold uppercase text-[10px]">{b.status}</td>
-                  <td className="p-3 text-right space-x-1">
-                    <select
-                      value={b.status}
-                      onChange={(e) => handleUpdateStatus(b.id, e.target.value)}
-                      className="bg-slate-950 border border-slate-800 rounded px-2 py-1 text-xs text-white focus:outline-none focus:border-emerald-500"
-                    >
-                      <option value="pending">Pending</option>
-                      <option value="confirmed">Confirmed</option>
-                      <option value="active">Active (Sewa)</option>
-                      <option value="returned">Returned (Selesai)</option>
-                      <option value="cancelled">Cancelled</option>
-                    </select>
-                  </td>
+      {/* Booking */}
+      <section id="booking" className={`scroll-mt-20 ${CARD} p-6 space-y-6`}>
+        <h3 className="font-display font-bold uppercase text-ink dark:text-white text-lg">Kelola Transaksi Booking</h3>
+        {loading ? (
+          <div className="space-y-2">{[...Array(5)].map((_, i) => <div key={i} className={`${SKEL} h-12 rounded-xl`} />)}</div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs text-ink/80 dark:text-sand/80">
+              <thead className="bg-bone dark:bg-white/5 text-ink/50 dark:text-sand/60 font-semibold uppercase border-b border-ink/10 dark:border-white/10">
+                <tr>
+                  <th className="p-3">Kode</th>
+                  <th className="p-3">Penyewa</th>
+                  <th className="p-3">Periode</th>
+                  <th className="p-3">Total</th>
+                  <th className="p-3">Jaminan ID</th>
+                  <th className="p-3">Status</th>
+                  <th className="p-3 text-right">Aksi</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+              </thead>
+              <tbody className="divide-y divide-ink/10 dark:divide-white/10">
+                {adminBookings.map((b) => (
+                  <tr key={b.id} className="hover:bg-bone/60 dark:hover:bg-white/5">
+                    <td className="p-3 font-display font-bold text-ink dark:text-white">{b.booking_code}</td>
+                    <td className="p-3">
+                      <p className="font-semibold text-ink dark:text-white">{b.user?.name}</p>
+                      <p className="text-[10px] text-ink/50 dark:text-sand/50">{b.user?.email}</p>
+                    </td>
+                    <td className="p-3">{formatDate(b.start_date)} - {formatDate(b.end_date)}</td>
+                    <td className="p-3 font-bold text-ember-2 dark:text-ember">{formatRupiah(b.total_price)}</td>
+                    <td className="p-3">
+                      <button
+                        onClick={() => handleToggleVerifyIdentity(b.id, b.identity_verified)}
+                        className={`px-2 py-1 rounded text-[10px] font-bold border ${
+                          b.identity_verified
+                            ? 'bg-moss/15 text-moss dark:text-moss-2 border-moss/30'
+                            : 'bg-ember/15 text-ember-2 dark:text-ember border-ember/30'
+                        }`}
+                      >
+                        {b.identity_verified ? 'Terverifikasi ✓' : 'Belum ⚠'}
+                      </button>
+                    </td>
+                    <td className="p-3 font-bold uppercase text-[10px] text-ink/70 dark:text-sand/70">{b.status}</td>
+                    <td className="p-3 text-right">
+                      <select
+                        value={b.status}
+                        onChange={(e) => handleUpdateStatus(b.id, e.target.value)}
+                        className="bg-bone dark:bg-[#12171b] border border-ink/15 dark:border-white/15 rounded px-2 py-1 text-xs text-ink dark:text-white focus:outline-none focus:border-ember"
+                      >
+                        <option value="pending">Pending</option>
+                        <option value="confirmed">Confirmed</option>
+                        <option value="active">Active</option>
+                        <option value="returned">Returned</option>
+                        <option value="cancelled">Cancelled</option>
+                      </select>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
     </div>
+  );
+}
+
+export default function AdminDashboardPage() {
+  return (
+    <AdminShell title="Dashboard">
+      <AdminDashboard />
+    </AdminShell>
   );
 }

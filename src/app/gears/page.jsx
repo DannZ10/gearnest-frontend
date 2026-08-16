@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import Link from 'next/link';
 import api from '@/lib/axios';
 import { formatRupiah } from '@/lib/format';
 import { useCartStore } from '@/store/useCartStore';
@@ -13,7 +12,6 @@ export default function GearCatalogPage() {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Filter States
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [sortBy, setSortBy] = useState('created_at');
@@ -72,87 +70,82 @@ export default function GearCatalogPage() {
     setPage(1);
   };
 
+  const inputCls =
+    'w-full bg-bone border border-ink/15 rounded-xl px-4 py-2.5 text-sm text-ink focus:outline-none focus:border-ember transition-colors';
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
-      {/* Header */}
       <div>
-        <h1 className="text-3xl font-extrabold text-white tracking-tight">Katalog Alat Outdoor</h1>
-        <p className="text-sm text-slate-400 mt-1">Cari dan sewa peralatan pendakian terbaik untuk perjalanan Anda</p>
+        <h1 className="font-display font-bold uppercase text-3xl sm:text-4xl text-ink">Katalog Gear</h1>
+        <div className="w-16 h-1 bg-ember rounded-full mt-3" />
+        <p className="text-sm text-ink/60 mt-3">Cari dan sewa peralatan pendakian terbaik untuk perjalananmu</p>
       </div>
 
-      {/* Filter & Search Bar */}
-      <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 sm:p-6 space-y-4">
+      {/* Filter bar */}
+      <div className="bg-white border border-ink/10 rounded-2xl p-4 sm:p-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Search Input */}
           <div className="relative">
-            <Search className="w-4 h-4 absolute left-3.5 top-3.5 text-slate-400" />
+            <Search className="w-4 h-4 absolute left-3.5 top-3.5 text-ink/40" />
             <input
               type="text"
               placeholder="Cari tenda, carrier, merk..."
               value={search}
               onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500 transition-colors"
+              className="w-full bg-bone border border-ink/15 rounded-xl pl-10 pr-4 py-2.5 text-sm text-ink focus:outline-none focus:border-ember transition-colors"
             />
           </div>
 
-          {/* Category Dropdown */}
-          <div>
-            <select
-              value={selectedCategory}
-              onChange={(e) => { setSelectedCategory(e.target.value); setPage(1); }}
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500 transition-colors"
-            >
-              <option value="">Semua Kategori (14)</option>
-              {categories.map((c) => (
-                <option key={c.id} value={c.slug}>{c.name}</option>
-              ))}
-            </select>
-          </div>
+          <select
+            value={selectedCategory}
+            onChange={(e) => { setSelectedCategory(e.target.value); setPage(1); }}
+            className={inputCls}
+          >
+            <option value="">Semua Kategori</option>
+            {categories.map((c) => (
+              <option key={c.id} value={c.slug}>{c.name}</option>
+            ))}
+          </select>
 
-          {/* Sort Dropdown */}
-          <div>
-            <select
-              value={`${sortBy}-${sortOrder}`}
-              onChange={(e) => {
-                const [sb, so] = e.target.value.split('-');
-                setSortBy(sb);
-                setSortOrder(so);
-                setPage(1);
-              }}
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500 transition-colors"
-            >
-              <option value="created_at-desc">Terbaru</option>
-              <option value="price_per_day-asc">Harga: Termurah ➔ Termahal</option>
-              <option value="price_per_day-desc">Harga: Termahal ➔ Termurah</option>
-              <option value="stock_available-desc">Stok Terbanyak</option>
-            </select>
-          </div>
+          <select
+            value={`${sortBy}-${sortOrder}`}
+            onChange={(e) => {
+              const [sb, so] = e.target.value.split('-');
+              setSortBy(sb);
+              setSortOrder(so);
+              setPage(1);
+            }}
+            className={inputCls}
+          >
+            <option value="created_at-desc">Terbaru</option>
+            <option value="price_per_day-asc">Harga: Termurah ➔ Termahal</option>
+            <option value="price_per_day-desc">Harga: Termahal ➔ Termurah</option>
+            <option value="stock_available-desc">Stok Terbanyak</option>
+          </select>
 
-          {/* Reset Filters */}
           <button
             onClick={clearFilters}
-            className="flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-semibold rounded-xl py-2.5 px-4 transition-all"
+            className="flex items-center justify-center gap-2 bg-bone-2 hover:bg-sand/40 text-ink border border-ink/10 text-sm font-semibold rounded-xl py-2.5 px-4 transition-all"
           >
             <X className="w-4 h-4" /> Reset Filter
           </button>
         </div>
       </div>
 
-      {/* Gears Grid */}
+      {/* Grid */}
       {loading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {[...Array(8)].map((_, i) => (
-            <div key={i} className="h-80 bg-slate-900 rounded-3xl animate-pulse" />
+            <div key={i} className="h-80 bg-bone-2 rounded-3xl animate-pulse" />
           ))}
         </div>
       ) : gears.length === 0 ? (
-        <div className="text-center py-20 bg-slate-900/40 border border-slate-800 rounded-3xl space-y-4">
-          <Filter className="w-12 h-12 text-slate-600 mx-auto" />
-          <h3 className="text-lg font-bold text-white">Tidak ada gear yang ditemukan</h3>
-          <p className="text-xs text-slate-400 max-w-sm mx-auto">
-            Coba ubah kata kunci pencarian atau bersihkan filter kategori Anda.
+        <div className="text-center py-20 bg-white border border-ink/10 rounded-3xl space-y-4">
+          <Filter className="w-12 h-12 text-ink/25 mx-auto" />
+          <h3 className="font-display font-bold uppercase text-lg text-ink">Tidak Ada Gear Ditemukan</h3>
+          <p className="text-xs text-ink/55 max-w-sm mx-auto">
+            Coba ubah kata kunci pencarian atau bersihkan filter kategori.
           </p>
-          <button onClick={clearFilters} className="px-4 py-2 bg-emerald-400 text-slate-950 text-xs font-bold rounded-xl">
+          <button onClick={clearFilters} className="px-4 py-2 bg-ember text-white text-xs font-bold rounded-xl">
             Tampilkan Semua Gear
           </button>
         </div>
@@ -161,48 +154,43 @@ export default function GearCatalogPage() {
           {gears.map((gear) => (
             <div
               key={gear.id}
-              className="group bg-slate-900/80 border border-slate-800 hover:border-emerald-500/30 rounded-3xl overflow-hidden flex flex-col transition-all hover:shadow-xl hover:shadow-emerald-500/5"
+              className="group bg-white border border-ink/10 hover:border-ember/40 rounded-3xl overflow-hidden flex flex-col transition-all hover:shadow-xl hover:shadow-ink/5"
             >
-              {/* Image */}
-              <div className="relative h-48 bg-slate-800 overflow-hidden">
+              <div className="relative h-48 bg-bone-2 overflow-hidden">
                 <img
                   src={gear.image_url || 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?w=500&auto=format&fit=crop&q=80'}
                   alt={gear.name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
-                <div className="absolute top-3 left-3 bg-slate-950/80 backdrop-blur-md px-2.5 py-1 rounded-full border border-slate-700 text-[10px] font-bold text-emerald-400">
+                <span className="absolute top-3 left-3 bg-ink/85 backdrop-blur-md px-2.5 py-1 rounded-full text-[10px] font-bold text-ember">
                   {gear.category?.name || gear.brand || 'Outdoor'}
-                </div>
-                <div className="absolute top-3 right-3 bg-emerald-500/20 text-emerald-300 backdrop-blur-md px-2 py-0.5 rounded-full text-[10px] font-semibold border border-emerald-500/30">
+                </span>
+                <span className="absolute top-3 right-3 bg-moss/90 text-white backdrop-blur-md px-2 py-0.5 rounded-full text-[10px] font-semibold">
                   Stok: {gear.stock_available}
-                </div>
+                </span>
               </div>
 
-              {/* Content */}
-              <div className="p-5 flex-grow flex flex-col justify-between space-y-4">
+              <div className="p-5 flex-grow flex flex-col justify-between gap-4">
                 <div>
-                  <h3 className="font-bold text-white text-base line-clamp-1 group-hover:text-emerald-400 transition-colors">
+                  <h3 className="font-display font-semibold uppercase tracking-wide text-ink text-base line-clamp-1 group-hover:text-ember transition-colors">
                     {gear.name}
                   </h3>
-                  <p className="text-xs text-slate-400 line-clamp-2 mt-1">
+                  <p className="text-xs text-ink/55 line-clamp-2 mt-1">
                     {gear.description || 'Perlengkapan gunung siap sewa.'}
                   </p>
                 </div>
 
-                <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between">
+                <div className="pt-3 border-t border-ink/10 flex items-center justify-between">
                   <div>
-                    <span className="text-[10px] text-slate-400 block">Sewa / Hari</span>
-                    <span className="font-extrabold text-emerald-400 text-sm">
-                      {formatRupiah(gear.price_per_day)}
-                    </span>
+                    <span className="text-[10px] text-ink/50 block">Sewa / Hari</span>
+                    <span className="font-display font-bold text-ink text-lg">{formatRupiah(gear.price_per_day)}</span>
                   </div>
-
                   <button
                     onClick={() => handleAddToCart(gear)}
-                    className="p-2.5 bg-emerald-400 hover:bg-emerald-300 text-slate-950 rounded-xl transition-all shadow-md shadow-emerald-500/10 active:scale-95"
+                    className="p-3 bg-ember hover:bg-ember-2 text-white rounded-xl transition-all shadow-md shadow-ember/20 active:scale-95"
                     title="Tambah ke Keranjang"
                   >
-                    <ShoppingBag className="w-4 h-4 font-bold" />
+                    <ShoppingBag className="w-4 h-4" />
                   </button>
                 </div>
               </div>
@@ -211,23 +199,23 @@ export default function GearCatalogPage() {
         </div>
       )}
 
-      {/* Pagination Controls */}
+      {/* Pagination */}
       {meta.last_page > 1 && (
-        <div className="flex items-center justify-center gap-4 pt-6 border-t border-slate-900">
+        <div className="flex items-center justify-center gap-4 pt-6 border-t border-ink/10">
           <button
             disabled={page <= 1}
             onClick={() => setPage(page - 1)}
-            className="p-2 bg-slate-900 border border-slate-800 text-slate-300 hover:text-white rounded-xl disabled:opacity-40 disabled:cursor-not-allowed"
+            className="p-2 bg-white border border-ink/15 text-ink/70 hover:text-ink rounded-xl disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <ArrowLeft className="w-4 h-4" />
           </button>
-          <span className="text-xs text-slate-400 font-medium">
-            Halaman <strong className="text-white">{meta.current_page}</strong> dari {meta.last_page} ({meta.total} gear)
+          <span className="text-xs text-ink/60 font-medium">
+            Halaman <strong className="text-ink">{meta.current_page}</strong> dari {meta.last_page} ({meta.total} gear)
           </span>
           <button
             disabled={page >= meta.last_page}
             onClick={() => setPage(page + 1)}
-            className="p-2 bg-slate-900 border border-slate-800 text-slate-300 hover:text-white rounded-xl disabled:opacity-40 disabled:cursor-not-allowed"
+            className="p-2 bg-white border border-ink/15 text-ink/70 hover:text-ink rounded-xl disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <ArrowRight className="w-4 h-4" />
           </button>
