@@ -71,10 +71,14 @@ export default function HeroSection() {
     <section
       ref={sectionRef}
       onClick={onSectionClick}
-      className="relative overflow-hidden bg-char text-white cursor-pointer select-none"
+      suppressHydrationWarning
+      className="relative overflow-hidden bg-char text-white select-none"
     >
-      {/* Image carousel (crossfade + gentle zoom) */}
-      <div className="absolute inset-0" aria-hidden="true">
+      {/* Image carousel (crossfade + gentle zoom). cursor-pointer lives on this
+          layer only (not the whole section) so it doesn't cascade to the text/
+          CTA area — that also keeps cursor-styling browser extensions from
+          mutating those nodes and tripping hydration warnings. */}
+      <div className="absolute inset-0 cursor-pointer" aria-hidden="true">
         {SLIDES.map((s, i) => (
           <img
             key={s.src}
@@ -99,7 +103,7 @@ export default function HeroSection() {
         <span className="w-14 h-px bg-white/30" />
       </div>
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-0 sm:pt-24">
+      <div suppressHydrationWarning className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-0 sm:pt-24">
         <div className="max-w-4xl">
           <div ref={tagRef} className="flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-[11px] uppercase tracking-[0.2em] text-white/55">
             <span className="inline-flex items-center gap-2 text-trail-2">
