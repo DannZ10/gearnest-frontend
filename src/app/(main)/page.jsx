@@ -6,6 +6,7 @@ import { useCartStore } from '@/store/useCartStore';
 import { toast } from 'sonner';
 
 import HeroSection from '@/components/organisms/HeroSection';
+import Marquee from '@/components/organisms/Marquee';
 import StatsBar from '@/components/organisms/StatsBar';
 import AdventureGrid from '@/components/organisms/AdventureGrid';
 import FeaturedGearGrid from '@/components/organisms/FeaturedGearGrid';
@@ -37,15 +38,16 @@ export default function HomePage() {
   };
 
   return (
-    <div className="space-y-4 pb-12">
+    <div className="pb-16">
       <HeroSection />
-      <StatsBar />
+      <Marquee />
       <AdventureGrid />
       <FeaturedGearGrid
         gears={featuredGears}
         loading={loading}
         onAddToCart={handleAddToCart}
       />
+      <StatsBar />
       <HowItWorks />
       <CtaBand />
     </div>

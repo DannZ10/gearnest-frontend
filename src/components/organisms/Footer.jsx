@@ -10,18 +10,20 @@ const FEATURES = [
 
 export default function Footer() {
   return (
-    <footer className="bg-ink text-sand/80 gn-topo mt-24">
+    <footer className="relative bg-char text-white/80 mt-24 overflow-hidden">
+      <div className="absolute inset-0 gn-gridlines opacity-40" />
+
       {/* Feature highlights */}
-      <div className="border-b border-white/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 grid grid-cols-1 md:grid-cols-3 gap-4">
-          {FEATURES.map((f) => (
-            <div key={f.title} className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/10">
-              <div className="grid place-items-center w-12 h-12 shrink-0 rounded-xl bg-ember/15 text-ember">
+      <div className="relative border-b-2 border-white/10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 grid grid-cols-1 md:grid-cols-3 gap-3">
+          {FEATURES.map((f, i) => (
+            <div key={f.title} className="flex items-center gap-4 p-4 rounded-md bg-white/5 border-2 border-white/10">
+              <div className={`grid place-items-center w-12 h-12 shrink-0 rounded-md ${i === 1 ? 'bg-trail/15 text-trail-2' : 'bg-ember/15 text-ember'}`}>
                 <f.icon className="w-6 h-6" />
               </div>
               <div>
-                <h4 className="font-display font-semibold text-white text-sm uppercase tracking-wide">{f.title}</h4>
-                <p className="text-xs text-sand/70">{f.desc}</p>
+                <h4 className="font-display font-bold text-white text-sm uppercase tracking-tight">{f.title}</h4>
+                <p className="text-xs text-white/60">{f.desc}</p>
               </div>
             </div>
           ))}
@@ -29,20 +31,20 @@ export default function Footer() {
       </div>
 
       {/* Main links */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 grid grid-cols-1 md:grid-cols-4 gap-10">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 grid grid-cols-1 md:grid-cols-4 gap-10">
         <div>
-          <Link href="/" className="flex items-center gap-2.5 mb-4">
-            <span className="grid place-items-center w-10 h-10 rounded-xl bg-ember text-ink">
+          <Link href="/" className="flex items-center gap-2.5 mb-4 group">
+            <span className="grid place-items-center w-10 h-10 rounded-md bg-ember text-char group-hover:-translate-y-0.5 transition-transform">
               <Mountain className="w-5 h-5" strokeWidth={2.5} />
             </span>
             <span className="font-display font-bold text-xl tracking-wide text-white">
               GEAR<span className="text-ember">NEST</span>
             </span>
           </Link>
-          <p className="text-xs text-sand/70 leading-relaxed mb-4 max-w-xs">
+          <p className="text-xs text-white/60 leading-relaxed mb-4 max-w-xs">
             Basecamp tepercaya untuk gear terawat dan petualangan tak terlupakan. Proses mudah, pembayaran otomatis Midtrans.
           </p>
-          <p className="text-xs text-sand/40">© 2026 GearNest. All rights reserved.</p>
+          <p className="font-mono text-[11px] text-white/40">© 2026 GearNest. All rights reserved.</p>
         </div>
 
         <FooterCol
@@ -65,11 +67,11 @@ export default function Footer() {
         />
 
         <div>
-          <h4 className="font-display font-semibold text-white text-sm uppercase tracking-wide mb-4">Pembayaran</h4>
-          <p className="text-xs text-sand/70 mb-3">Otomatis via Midtrans Snap — Bank Transfer, QRIS, & E-Wallet.</p>
-          <div className="flex flex-wrap gap-2 text-[10px] font-bold text-sand">
+          <h4 className="font-display font-bold text-white text-sm uppercase tracking-tight mb-4">Pembayaran</h4>
+          <p className="text-xs text-white/60 mb-3">Otomatis via Midtrans Snap — Bank Transfer, QRIS, & E-Wallet.</p>
+          <div className="flex flex-wrap gap-2 font-mono text-[10px] font-bold text-white/70">
             {['BCA', 'Mandiri', 'BNI', 'BRI', 'QRIS', 'Gopay'].map((m) => (
-              <span key={m} className="px-2 py-1 bg-white/5 border border-white/10 rounded">
+              <span key={m} className="px-2 py-1 bg-white/5 border border-white/10 rounded-sm">
                 {m}
               </span>
             ))}
@@ -77,8 +79,8 @@ export default function Footer() {
         </div>
       </div>
 
-      <div className="border-t border-white/10 py-5 text-center">
-        <p className="font-display text-xs uppercase tracking-[0.2em] text-sand/50">
+      <div className="relative border-t-2 border-white/10 py-5 text-center">
+        <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-white/45">
           Your Gear. Your Nest. Your Adventure.
         </p>
       </div>
@@ -89,11 +91,11 @@ export default function Footer() {
 function FooterCol({ title, links }) {
   return (
     <div>
-      <h4 className="font-display font-semibold text-white text-sm uppercase tracking-wide mb-4">{title}</h4>
+      <h4 className="font-display font-bold text-white text-sm uppercase tracking-tight mb-4">{title}</h4>
       <ul className="space-y-2.5 text-xs">
         {links.map(([label, href]) => (
           <li key={label}>
-            <Link href={href} className="text-sand/70 hover:text-ember transition-colors">
+            <Link href={href} className="text-white/60 hover:text-ember transition-colors">
               {label}
             </Link>
           </li>

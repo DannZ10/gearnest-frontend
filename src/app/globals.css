@@ -18,9 +18,13 @@
   --color-sand: #cdaa7d;
   --color-ember: #e58a26;
   --color-ember-2: #c9741a;
+  --color-trail: #0f766e;
+  --color-trail-2: #2dd4bf;
+  --color-char: #12181c;
 
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-oswald), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, "SFMono-Regular", "Roboto Mono", monospace;
 }
 
 :root {
@@ -90,15 +94,53 @@ body {
   animation: gn-float 4s ease-in-out infinite;
 }
 
+/* Infinite category ticker (duplicate content in markup, translate one half) */
+@keyframes gn-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.gn-marquee-track {
+  display: inline-flex;
+  white-space: nowrap;
+  animation: gn-marquee 32s linear infinite;
+}
+.gn-marquee:hover .gn-marquee-track {
+  animation-play-state: paused;
+}
+
+/* Content fade-up for the auth form swap */
+@keyframes gn-fade-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+.gn-fade-up { animation: gn-fade-up 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+
+/* Hollow outlined display numerals for section indices */
+.gn-stroke {
+  color: transparent;
+  -webkit-text-stroke: 2px currentColor;
+  text-stroke: 2px currentColor;
+}
+
+/* Structural hairline grid overlay for dark expedition blocks */
+.gn-gridlines {
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 64px 64px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .gn-reveal,
   .gn-kenburns,
-  .gn-float {
+  .gn-float,
+  .gn-fade-up {
     animation: none !important;
     transition: none !important;
     opacity: 1 !important;
     transform: none !important;
   }
+  .gn-marquee-track { animation: none !important; }
 }
 
 /* ==========================================================================

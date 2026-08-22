@@ -84,7 +84,7 @@ export default function GearCatalogPage() {
       />
 
       {/* Filter bar */}
-      <Card className="p-4 sm:p-6 rounded-2xl">
+      <Card className="p-4 sm:p-6 rounded-md border-2 border-ink/10">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="relative">
             <Search className="w-4 h-4 absolute left-3.5 top-3.5 text-ink/40" />
@@ -136,7 +136,7 @@ export default function GearCatalogPage() {
       {loading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {[...Array(8)].map((_, i) => (
-            <Skeleton key={i} className="h-80 rounded-3xl" />
+            <Skeleton key={i} className="h-80 rounded-md" />
           ))}
         </div>
       ) : gears.length === 0 ? (

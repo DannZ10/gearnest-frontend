@@ -29,7 +29,7 @@ const shortDate = (s) => (s ? new Date(s).toLocaleDateString('id-ID', { day: 'nu
 
 function ChartCard({ title, children, empty }) {
   return (
-    <div className="bg-white dark:bg-[#1b2228] border border-ink/10 dark:border-white/10 rounded-3xl p-6 space-y-4">
+    <div className="bg-white dark:bg-[#1b2228] border-2 border-ink/10 dark:border-white/10 rounded-md p-6 space-y-4">
       <h3 className="font-display font-bold uppercase text-ink dark:text-white text-base flex items-center gap-2">
         <BarChart3 className="w-5 h-5 text-ember" /> {title}
       </h3>
@@ -87,7 +87,7 @@ export default function AnalyticsCharts() {
   if (!data) {
     return (
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {[...Array(4)].map((_, i) => <div key={i} className="h-[300px] bg-bone-2 dark:bg-white/5 rounded-3xl animate-pulse" />)}
+        {[...Array(4)].map((_, i) => <div key={i} className="h-[300px] bg-bone-2 dark:bg-white/5 rounded-md animate-pulse" />)}
       </div>
     );
   }

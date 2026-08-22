@@ -28,12 +28,11 @@ export default function AboutPage() {
   return (
     <div>
       {/* Header band */}
-      <section className="relative overflow-hidden bg-ink text-white gn-topo">
+      <section className="relative overflow-hidden bg-ink text-white gn-gridlines">
         <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-ember/20 blur-3xl pointer-events-none" />
         <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 text-center">
-          <Reveal className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-moss/40 border border-white/10">
-            <Mountain className="w-3.5 h-3.5 text-ember" />
-            <span className="text-[11px] font-display font-semibold uppercase tracking-[0.15em]">Panduan Sewa</span>
+          <Reveal className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.22em] text-trail-2">
+            <Mountain className="w-3.5 h-3.5 text-ember" /> // Panduan Sewa
           </Reveal>
           <Reveal as="h1" delay={80} className="mt-5 font-display font-bold uppercase leading-[0.95] tracking-tight"
             style={{ fontSize: 'clamp(2.25rem, 6vw, 4rem)' }}>
@@ -50,12 +49,12 @@ export default function AboutPage() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           {STEPS.map((s, i) => (
             <Reveal key={s.n} delay={i * 90}>
-              <div className="h-full bg-white border border-ink/10 rounded-3xl p-6 hover:-translate-y-1 transition-transform">
+              <div className="h-full bg-white border-2 border-ink/10 rounded-md p-6 hover:-translate-y-1 transition-transform">
                 <div className="flex items-center justify-between">
-                  <span className="grid place-items-center w-12 h-12 rounded-2xl bg-ink text-ember">
+                  <span className="grid place-items-center w-12 h-12 rounded-md bg-ink text-ember">
                     <s.icon className="w-5 h-5" />
                   </span>
-                  <span className="font-display font-bold text-4xl text-bone-2">{s.n}</span>
+                  <span className="font-display font-bold text-5xl leading-none text-ink/15 gn-stroke">{s.n}</span>
                 </div>
                 <h3 className="font-display font-semibold uppercase tracking-wide text-ink text-base mt-4">{s.title}</h3>
                 <p className="text-xs text-ink/60 mt-1.5 leading-relaxed">{s.desc}</p>
@@ -68,7 +67,7 @@ export default function AboutPage() {
       {/* Delivery + Identity */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Reveal className="bg-white border border-ink/10 rounded-3xl p-7 space-y-4">
+          <Reveal className="bg-white border-2 border-ink/10 rounded-md p-7 space-y-4">
             <h2 className="font-display font-bold uppercase text-xl text-ink flex items-center gap-2">
               <Truck className="w-5 h-5 text-ember" /> Pengambilan & Pengiriman
             </h2>
@@ -88,7 +87,7 @@ export default function AboutPage() {
             </div>
           </Reveal>
 
-          <Reveal delay={80} className="bg-white border border-ink/10 rounded-3xl p-7 space-y-3">
+          <Reveal delay={80} className="bg-white border-2 border-ink/10 rounded-md p-7 space-y-3">
             <h2 className="font-display font-bold uppercase text-xl text-ink flex items-center gap-2">
               <ShieldCheck className="w-5 h-5 text-ember" /> Jaminan Identitas
             </h2>
@@ -104,13 +103,13 @@ export default function AboutPage() {
       {/* FAQ */}
       <section className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pt-16">
         <Reveal className="text-center mb-8">
-          <h2 className="font-display font-bold uppercase text-3xl text-ink">FAQ</h2>
-          <div className="w-16 h-1 bg-ember rounded-full mx-auto mt-3" />
+          <p className="font-mono text-xs uppercase tracking-[0.22em] text-trail mb-2">// Tanya Jawab</p>
+          <h2 className="font-display font-bold uppercase text-4xl tracking-tight text-ink">FAQ</h2>
         </Reveal>
         <div className="space-y-3">
           {FAQ.map(([q, a], i) => (
             <Reveal key={q} delay={i * 60}>
-              <details className="group bg-white border border-ink/10 rounded-2xl p-5">
+              <details className="group bg-white border-2 border-ink/10 rounded-md p-5">
                 <summary className="cursor-pointer font-semibold text-ink text-sm list-none flex items-center justify-between">
                   {q}
                   <ArrowRight className="w-4 h-4 text-ember transition-transform group-open:rotate-90" />
@@ -124,13 +123,13 @@ export default function AboutPage() {
 
       {/* CTA */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16">
-        <Reveal className="relative overflow-hidden rounded-[2rem] bg-ink text-white px-8 py-12 sm:px-16 text-center gn-topo">
+        <Reveal className="relative overflow-hidden rounded-xl bg-ink text-white px-8 py-12 sm:px-16 text-center gn-gridlines">
           <div className="absolute -bottom-24 -left-16 w-80 h-80 rounded-full bg-ember/20 blur-3xl" />
           <div className="relative">
             <h2 className="font-display font-bold uppercase text-2xl sm:text-3xl">Siap sewa gear pertamamu?</h2>
             <p className="mt-3 text-sand/80 text-sm">Katalog lengkap menunggu. Pilih, atur tanggal, dan berangkat.</p>
             <Link href="/gears"
-              className="group inline-flex items-center gap-2 mt-6 px-7 py-3.5 bg-ember hover:bg-ember-2 text-white font-display font-semibold uppercase tracking-wide rounded-xl shadow-lg shadow-ember/30 transition-all">
+              className="group inline-flex items-center gap-2 mt-6 px-7 py-3.5 bg-ember hover:bg-ember-2 text-white font-display font-semibold uppercase tracking-wide rounded-md shadow-lg shadow-ember/30 transition-all">
               Jelajahi Gear <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
             </Link>
           </div>

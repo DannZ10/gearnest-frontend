@@ -1,6 +1,7 @@
 import React from 'react';
 import { Inter, Oswald } from 'next/font/google';
 import { Toaster } from 'sonner';
+import IdleTimeout from '@/components/templates/IdleTimeout';
 import './globals.css';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
@@ -18,9 +19,13 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="id" className={`${inter.variable} ${oswald.variable}`}>
-      <body className="bg-bone text-ink min-h-screen flex flex-col antialiased">
+    <html lang="id" className={`${inter.variable} ${oswald.variable}`} suppressHydrationWarning>
+      <body
+        className="bg-bone text-ink min-h-screen flex flex-col antialiased"
+        suppressHydrationWarning
+      >
         {children}
+        <IdleTimeout />
         <Toaster position="bottom-right" richColors />
       </body>
     </html>

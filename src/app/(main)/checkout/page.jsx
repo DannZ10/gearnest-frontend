@@ -7,11 +7,12 @@ import { useCartStore } from '@/store/useCartStore';
 import { useAuthStore } from '@/store/useAuthStore';
 import { formatRupiah, formatDate } from '@/lib/format';
 import { toast } from 'sonner';
+import RequireAuth from '@/components/templates/RequireAuth';
 import { ShieldCheck, CreditCard, Calendar, Truck, Loader2 } from 'lucide-react';
 
-export default function CheckoutPage() {
+function CheckoutInner() {
   const router = useRouter();
-  const { user, isAuthenticated } = useAuthStore();
+  const { user } = useAuthStore();
   const {
     items,
     startDate,
@@ -31,12 +32,10 @@ export default function CheckoutPage() {
   const [submitting, setSubmitting] = useState(false);
   const [mounted, setMounted] = useState(false);
 
+  // Auth (and the persist-hydration race) is handled by RequireAuth below.
   useEffect(() => {
     setMounted(true);
-    if (!isAuthenticated) {
-      router.push('/login?redirect=/checkout');
-    }
-  }, [isAuthenticated, router]);
+  }, []);
 
   if (!mounted || items.length === 0) {
     return (
@@ -44,9 +43,25 @@ export default function CheckoutPage() {
         <p className="text-ink/60">Keranjang sewa Anda kosong.</p>
         <button
           onClick={() => router.push('/gears')}
-          className="px-4 py-2 bg-ember text-white font-bold text-xs rounded-xl"
+          className="px-4 py-2 bg-ember text-white font-bold text-xs rounded-md"
         >
           Lihat Katalog Gear
+        </button>
+      </div>
+    );
+  }
+
+  // Dates are chosen on the cart page. Landing here without them (direct link,
+  // back button) would fail booking validation with a confusing error.
+  if (!startDate || !endDate) {
+    return (
+      <div className="max-w-md mx-auto my-20 text-center space-y-4">
+        <p className="text-ink/60">Tanggal sewa belum diatur.</p>
+        <button
+          onClick={() => router.push('/cart')}
+          className="px-4 py-2 bg-ember text-white font-bold text-xs rounded-md"
+        >
+          Atur Tanggal di Keranjang
         </button>
       </div>
     );
@@ -95,15 +110,15 @@ export default function CheckoutPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
       <div>
-        <h1 className="font-display font-bold uppercase text-3xl sm:text-4xl text-ink">Konfirmasi Booking</h1>
-        <div className="w-16 h-1 bg-ember rounded-full mt-3" />
-        <p className="text-sm text-ink/60 mt-3">Periksa kembali rincian persewaan sebelum membayar</p>
+        <p className="font-mono text-xs uppercase tracking-[0.22em] text-trail mb-3">// Konfirmasi</p>
+        <h1 className="font-display font-bold uppercase text-4xl sm:text-5xl leading-[0.9] tracking-tight text-ink">Konfirmasi Booking</h1>
+        <p className="text-sm text-ink/60 mt-3">Periksa kembali rincian persewaan sebelum membayar.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {/* Left */}
         <div className="md:col-span-2 space-y-6">
-          <div className="bg-white border border-ink/10 rounded-3xl p-6 space-y-3">
+          <div className="bg-white border-2 border-ink/10 rounded-md p-6 space-y-3">
             <h3 className="font-display font-semibold uppercase tracking-wide text-ink text-base">Informasi Penyewa</h3>
             <div className="grid grid-cols-2 gap-4 text-xs">
               <Info label="Nama Lengkap" value={user?.name} />
@@ -112,10 +127,10 @@ export default function CheckoutPage() {
             </div>
           </div>
 
-          <div className="bg-white border border-ink/10 rounded-3xl p-6 space-y-4">
+          <div className="bg-white border-2 border-ink/10 rounded-md p-6 space-y-4">
             <h3 className="font-display font-semibold uppercase tracking-wide text-ink text-base">Rincian Sewa & Pengiriman</h3>
 
-            <div className="grid grid-cols-2 gap-4 text-xs p-4 bg-bone rounded-2xl border border-ink/10">
+            <div className="grid grid-cols-2 gap-4 text-xs p-4 bg-bone rounded-md border-2 border-ink/10">
               <div className="flex items-center gap-2">
                 <Calendar className="w-4 h-4 text-ember" />
                 <div>
@@ -133,7 +148,7 @@ export default function CheckoutPage() {
             </div>
 
             {deliveryType === 'delivery' && (
-              <div className="text-xs p-4 bg-bone rounded-2xl border border-ink/10 space-y-1">
+              <div className="text-xs p-4 bg-bone rounded-md border-2 border-ink/10 space-y-1">
                 <span className="text-ink/50 block font-medium">Alamat Pengiriman ({deliveryDistanceKm} km):</span>
                 <p className="text-ink">{deliveryAddress}</p>
               </div>
@@ -146,12 +161,12 @@ export default function CheckoutPage() {
                 placeholder="Contoh: Titik temu di gerbang utama / antar jam 8 pagi..."
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                className="w-full bg-bone border border-ink/15 rounded-xl px-4 py-2 text-sm text-ink focus:outline-none focus:border-ember"
+                className="w-full bg-bone border border-ink/15 rounded-md px-4 py-2 text-sm text-ink focus:outline-none focus:border-ember"
               />
             </div>
           </div>
 
-          <div className="bg-white border border-ink/10 rounded-3xl p-6 space-y-3">
+          <div className="bg-white border-2 border-ink/10 rounded-md p-6 space-y-3">
             <h3 className="font-display font-semibold uppercase tracking-wide text-ink text-base flex items-center gap-2">
               <ShieldCheck className="w-5 h-5 text-ember" /> Syarat Jaminan Identitas
             </h3>
@@ -172,7 +187,7 @@ export default function CheckoutPage() {
 
         {/* Right */}
         <div>
-          <div className="bg-white border border-ink/10 rounded-3xl p-6 space-y-6 sticky top-24 shadow-xl shadow-ink/5">
+          <div className="bg-white border-2 border-ink/10 rounded-md p-6 space-y-6 sticky top-24 shadow-xl shadow-ink/5">
             <h3 className="font-display font-bold uppercase text-ink text-lg border-b border-ink/10 pb-4">Pembayaran Midtrans</h3>
             <div className="space-y-3 text-xs">
               <Row label="Durasi:" value={`${getDurationDays()} Hari`} />
@@ -186,7 +201,7 @@ export default function CheckoutPage() {
             <button
               onClick={handleCreateBooking}
               disabled={submitting}
-              className="w-full py-3.5 bg-ember hover:bg-ember-2 text-white font-display font-semibold uppercase tracking-wide rounded-xl shadow-lg shadow-ember/25 transition-all flex items-center justify-center gap-2 text-sm disabled:opacity-50"
+              className="w-full py-3.5 bg-ember hover:bg-ember-2 text-white font-display font-semibold uppercase tracking-wide rounded-md shadow-lg shadow-ember/25 transition-all flex items-center justify-center gap-2 text-sm disabled:opacity-50"
             >
               {submitting ? (
                 <><Loader2 className="w-4 h-4 animate-spin" /> Memproses...</>
@@ -198,6 +213,14 @@ export default function CheckoutPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function CheckoutPage() {
+  return (
+    <RequireAuth>
+      <CheckoutInner />
+    </RequireAuth>
   );
 }
 

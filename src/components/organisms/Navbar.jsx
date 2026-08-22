@@ -56,7 +56,7 @@ export default function Navbar() {
           <BrandMark showTagline />
 
           {/* Desktop nav */}
-          <nav className="hidden md:flex items-center gap-8 text-sm font-semibold text-ink/70">
+          <nav className="hidden md:flex items-center gap-7 font-display uppercase tracking-wide text-[13px] text-ink/70">
             {NAV_LINKS.map((l) => {
               const active = l.href === '/' ? pathname === '/' : pathname.startsWith(l.href);
               return (
@@ -66,7 +66,7 @@ export default function Navbar() {
                   className={`relative transition-colors hover:text-ember ${active ? 'text-ember' : ''}`}
                 >
                   {l.label}
-                  {active && <span className="absolute -bottom-1.5 left-0 right-0 h-0.5 bg-ember rounded-full" />}
+                  {active && <span className="absolute -bottom-1.5 left-0 right-0 h-[3px] bg-ember" />}
                 </Link>
               );
             })}
@@ -76,7 +76,7 @@ export default function Navbar() {
           <div className="flex items-center gap-3">
             <Link
               href="/cart"
-              className="relative p-2.5 text-ink/70 hover:text-ink hover:bg-bone-2 rounded-xl transition-all"
+              className="relative p-2.5 text-ink/70 hover:text-ink hover:bg-bone-2 rounded-md transition-all"
               title="Keranjang Sewa"
             >
               <ShoppingBag className="w-5 h-5" />
@@ -91,11 +91,11 @@ export default function Navbar() {
               <div className="relative">
                 <button
                   onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                  className="flex items-center gap-2 py-1.5 pl-3 pr-2 text-sm bg-bone-2 hover:bg-sand/40 border border-ink/10 rounded-xl transition-all"
+                  className="flex items-center gap-2 py-1.5 pl-3 pr-2 text-sm bg-bone-2 hover:bg-sand/40 border border-ink/10 rounded-md transition-all"
                 >
-                  <span className="font-semibold max-w-[120px] truncate text-ink">{user?.name || 'Akun'}</span>
+                  <span className="hidden sm:inline font-semibold max-w-[120px] truncate text-ink">{user?.name || 'Akun'}</span>
                   {role === 'admin' && (
-                    <Badge variant="warning">
+                    <Badge variant="warning" className="hidden sm:inline-flex">
                       ADMIN
                     </Badge>
                   )}
@@ -103,7 +103,7 @@ export default function Navbar() {
                 </button>
 
                 {userDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-56 bg-white border border-ink/10 rounded-2xl shadow-xl shadow-ink/10 py-2 z-50 text-sm">
+                  <div className="absolute right-0 mt-2 w-56 bg-white border border-ink/10 rounded-md shadow-xl shadow-ink/10 py-2 z-50 text-sm">
                     <div className="px-4 py-2 border-b border-ink/10">
                       <p className="font-semibold text-ink">{user?.name}</p>
                       <p className="text-xs text-ink/50 truncate">{user?.email}</p>
@@ -173,7 +173,7 @@ export default function Navbar() {
               key={l.href}
               href={l.href}
               onClick={() => setMobileMenuOpen(false)}
-              className="block px-3 py-2.5 rounded-lg text-base font-semibold text-ink/80 hover:bg-bone-2"
+              className="block px-3 py-2.5 rounded-md text-base font-semibold text-ink/80 hover:bg-bone-2"
             >
               {l.label}
             </Link>
@@ -183,14 +183,14 @@ export default function Navbar() {
               <Link
                 href="/login"
                 onClick={() => setMobileMenuOpen(false)}
-                className="w-full text-center px-4 py-2.5 text-sm font-semibold text-ink bg-bone-2 rounded-xl"
+                className="w-full text-center px-4 py-2.5 text-sm font-semibold text-ink bg-bone-2 rounded-md"
               >
                 Masuk
               </Link>
               <Link
                 href="/gears"
                 onClick={() => setMobileMenuOpen(false)}
-                className="w-full text-center px-4 py-2.5 text-sm font-display font-semibold uppercase tracking-wide text-white bg-ember rounded-xl"
+                className="w-full text-center px-4 py-2.5 text-sm font-display font-semibold uppercase tracking-wide text-white bg-ember rounded-md"
               >
                 Sewa Sekarang
               </Link>
