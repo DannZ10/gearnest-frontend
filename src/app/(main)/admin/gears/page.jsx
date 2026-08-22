@@ -1,12 +1,75 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import api from '@/lib/axios';
 import { formatRupiah } from '@/lib/format';
 import { toast } from 'sonner';
 import AdminShell from '@/components/organisms/AdminShell';
 import { CARD, SKEL, INPUT, SectionHead, Btn, Modal, Field } from '@/components/admin/ui';
-import { Plus, Pencil, PowerOff, Search } from 'lucide-react';
+import { Plus, Pencil, Power, PowerOff, Trash2, MoreVertical, Search } from 'lucide-react';
+
+// Meatball (⋮) row menu. Renders fixed-positioned so it escapes the table's
+// horizontal-scroll container instead of being clipped.
+function RowActions({ gear, onEdit, onToggle, onDelete }) {
+  const [open, setOpen] = useState(false);
+  const [pos, setPos] = useState({ top: 0, left: 0 });
+  const btnRef = useRef(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const close = () => setOpen(false);
+    window.addEventListener('scroll', close, true);
+    window.addEventListener('resize', close);
+    document.addEventListener('mousedown', close);
+    return () => {
+      window.removeEventListener('scroll', close, true);
+      window.removeEventListener('resize', close);
+      document.removeEventListener('mousedown', close);
+    };
+  }, [open]);
+
+  const toggleMenu = () => {
+    if (open) { setOpen(false); return; }
+    const r = btnRef.current.getBoundingClientRect();
+    setPos({ top: r.bottom + 6, left: r.right - 180 });
+    setOpen(true);
+  };
+
+  const item = 'w-full flex items-center gap-2.5 px-3 py-2.5 text-sm text-left transition-colors';
+
+  return (
+    <>
+      <button
+        ref={btnRef}
+        onClick={toggleMenu}
+        aria-label="Aksi gear"
+        className="grid place-items-center w-8 h-8 rounded-md border-2 border-ink/10 dark:border-white/10 text-ink/70 dark:text-sand hover:border-ember/40"
+      >
+        <MoreVertical className="w-4 h-4" />
+      </button>
+
+      {open && (
+        <div
+          onMouseDown={(e) => e.stopPropagation()}
+          style={{ position: 'fixed', top: pos.top, left: pos.left }}
+          className="w-45 z-[70] rounded-md border-2 border-ink/10 dark:border-white/10 bg-white dark:bg-[#1b2228] shadow-xl shadow-ink/20 py-1"
+        >
+          <button onClick={() => { setOpen(false); onEdit(); }} className={`${item} text-ink/80 dark:text-sand hover:bg-bone dark:hover:bg-white/5`}>
+            <Pencil className="w-4 h-4 text-ink/50 dark:text-sand/60" /> Edit
+          </button>
+          <button onClick={() => { setOpen(false); onToggle(); }} className={`${item} text-ink/80 dark:text-sand hover:bg-bone dark:hover:bg-white/5`}>
+            {gear.is_available
+              ? <><PowerOff className="w-4 h-4 text-ember-2 dark:text-ember" /> Nonaktifkan</>
+              : <><Power className="w-4 h-4 text-moss" /> Aktifkan kembali</>}
+          </button>
+          <button onClick={() => { setOpen(false); onDelete(); }} className={`${item} text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10`}>
+            <Trash2 className="w-4 h-4" /> Hapus permanen
+          </button>
+        </div>
+      )}
+    </>
+  );
+}
 
 const EMPTY = {
   category_id: '', name: '', description: '', brand: '',
@@ -146,14 +209,25 @@ function AdminGears() {
     return gears.filter((g) => `${g.name} ${g.brand} ${g.category?.name}`.toLowerCase().includes(s));
   }, [gears, q]);
 
-  const deactivate = async (gear) => {
-    if (!window.confirm(`Nonaktifkan "${gear.name}"? Gear tidak akan tampil di katalog publik.`)) return;
+  const setAvailability = async (gear, available) => {
+    if (available === false && !window.confirm(`Nonaktifkan "${gear.name}"? Gear tidak akan tampil di katalog publik.`)) return;
     try {
-      await api.delete(`/admin/gears/${gear.id}`);
-      toast.success('Gear dinonaktifkan.');
+      await api.patch(`/admin/gears/${gear.id}/availability`, { available });
+      toast.success(available ? 'Gear diaktifkan kembali.' : 'Gear dinonaktifkan.');
       load();
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Gagal menonaktifkan gear.');
+      toast.error(err.response?.data?.message || 'Gagal memperbarui status gear.');
+    }
+  };
+
+  const remove = async (gear) => {
+    if (!window.confirm(`Hapus PERMANEN "${gear.name}"? Tindakan ini tidak bisa dibatalkan.`)) return;
+    try {
+      await api.delete(`/admin/gears/${gear.id}`);
+      toast.success('Gear dihapus permanen.');
+      load();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Gagal menghapus gear.');
     }
   };
 
@@ -213,14 +287,20 @@ function AdminGears() {
                     </td>
                     <td className="p-3">
                       <div className="flex items-center justify-end gap-2">
-                        <button onClick={() => openEdit(g)} title="Edit" className="grid place-items-center w-8 h-8 rounded-md bg-bone dark:bg-white/5 border-2 border-ink/10 dark:border-white/10 text-ink/70 dark:text-sand hover:border-ember/40">
-                          <Pencil className="w-4 h-4" />
-                        </button>
-                        {g.is_available && (
-                          <button onClick={() => deactivate(g)} title="Nonaktifkan" className="grid place-items-center w-8 h-8 rounded-md bg-red-500/10 border-2 border-red-500/20 text-red-600 dark:text-red-400 hover:bg-red-500/20">
-                            <PowerOff className="w-4 h-4" />
+                        {!g.is_available && (
+                          <button
+                            onClick={() => setAvailability(g, true)}
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-moss/15 border-2 border-moss/30 text-moss font-mono text-[10px] font-bold uppercase tracking-wide hover:bg-moss/25"
+                          >
+                            <Power className="w-3.5 h-3.5" /> Aktifkan
                           </button>
                         )}
+                        <RowActions
+                          gear={g}
+                          onEdit={() => openEdit(g)}
+                          onToggle={() => setAvailability(g, !g.is_available)}
+                          onDelete={() => remove(g)}
+                        />
                       </div>
                     </td>
                   </tr>
