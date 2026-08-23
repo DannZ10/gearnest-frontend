@@ -10,7 +10,7 @@ export default function CtaBand() {
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20">
       <Reveal className="relative overflow-hidden rounded-xl bg-char text-white px-7 py-14 sm:px-14 sm:py-20 border border-white/10">
-        <div className="absolute inset-0 gn-gridlines opacity-50" />
+        <div className="absolute inset-0 gn-topo opacity-50" />
         <div className="absolute -bottom-28 -left-20 w-[26rem] h-[26rem] rounded-full bg-ember/25 blur-[100px]" />
         <div className="absolute -top-28 -right-16 w-80 h-80 rounded-full bg-trail/25 blur-[90px]" />
 

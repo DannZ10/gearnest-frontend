@@ -1,30 +1,32 @@
 'use client';
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import api from '@/lib/axios';
 import { formatRupiah } from '@/lib/format';
 import { toast } from 'sonner';
 import AdminShell from '@/components/organisms/AdminShell';
 import { CARD, SKEL, INPUT, SectionHead, Btn, Modal, Field } from '@/components/admin/ui';
-import { Plus, Pencil, Power, PowerOff, Trash2, MoreVertical, Search } from 'lucide-react';
+import { Plus, Pencil, Power, PowerOff, Trash2, MoreVertical, Search, Layers, X } from 'lucide-react';
 
 // Meatball (⋮) row menu. Renders fixed-positioned so it escapes the table's
 // horizontal-scroll container instead of being clipped.
-function RowActions({ gear, onEdit, onToggle, onDelete }) {
+function RowActions({ gear, onEdit, onToggle, onDelete, onVariants }) {
   const [open, setOpen] = useState(false);
   const [pos, setPos] = useState({ top: 0, left: 0 });
   const btnRef = useRef(null);
 
+  // Close on scroll/resize (position would go stale). Outside-click is handled
+  // by the backdrop below — no document mousedown listener, which used to race
+  // the button's click and swallow it.
   useEffect(() => {
     if (!open) return;
     const close = () => setOpen(false);
     window.addEventListener('scroll', close, true);
     window.addEventListener('resize', close);
-    document.addEventListener('mousedown', close);
     return () => {
       window.removeEventListener('scroll', close, true);
       window.removeEventListener('resize', close);
-      document.removeEventListener('mousedown', close);
     };
   }, [open]);
 
@@ -35,6 +37,7 @@ function RowActions({ gear, onEdit, onToggle, onDelete }) {
     setOpen(true);
   };
 
+  const run = (fn) => { setOpen(false); fn(); };
   const item = 'w-full flex items-center gap-2.5 px-3 py-2.5 text-sm text-left transition-colors';
 
   return (
@@ -48,24 +51,30 @@ function RowActions({ gear, onEdit, onToggle, onDelete }) {
         <MoreVertical className="w-4 h-4" />
       </button>
 
-      {open && (
-        <div
-          onMouseDown={(e) => e.stopPropagation()}
-          style={{ position: 'fixed', top: pos.top, left: pos.left }}
-          className="w-45 z-[70] rounded-md border-2 border-ink/10 dark:border-white/10 bg-white dark:bg-[#1b2228] shadow-xl shadow-ink/20 py-1"
-        >
-          <button onClick={() => { setOpen(false); onEdit(); }} className={`${item} text-ink/80 dark:text-sand hover:bg-bone dark:hover:bg-white/5`}>
-            <Pencil className="w-4 h-4 text-ink/50 dark:text-sand/60" /> Edit
-          </button>
-          <button onClick={() => { setOpen(false); onToggle(); }} className={`${item} text-ink/80 dark:text-sand hover:bg-bone dark:hover:bg-white/5`}>
-            {gear.is_available
-              ? <><PowerOff className="w-4 h-4 text-ember-2 dark:text-ember" /> Nonaktifkan</>
-              : <><Power className="w-4 h-4 text-moss" /> Aktifkan kembali</>}
-          </button>
-          <button onClick={() => { setOpen(false); onDelete(); }} className={`${item} text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10`}>
-            <Trash2 className="w-4 h-4" /> Hapus permanen
-          </button>
-        </div>
+      {open && createPortal(
+        <>
+          <div className="fixed inset-0 z-[65]" onClick={() => setOpen(false)} />
+          <div
+            style={{ position: 'fixed', top: pos.top, left: pos.left }}
+            className="w-45 z-[70] rounded-md border-2 border-ink/10 dark:border-white/10 bg-white dark:bg-[#213026] shadow-xl shadow-ink/20 py-1"
+          >
+            <button onClick={() => run(onEdit)} className={`${item} text-ink/80 dark:text-sand hover:bg-bone dark:hover:bg-white/5`}>
+              <Pencil className="w-4 h-4 text-ink/50 dark:text-sand/60" /> Edit
+            </button>
+            <button onClick={() => run(onVariants)} className={`${item} text-ink/80 dark:text-sand hover:bg-bone dark:hover:bg-white/5`}>
+              <Layers className="w-4 h-4 text-trail" /> Kelola Varian
+            </button>
+            <button onClick={() => run(onToggle)} className={`${item} text-ink/80 dark:text-sand hover:bg-bone dark:hover:bg-white/5`}>
+              {gear.is_available
+                ? <><PowerOff className="w-4 h-4 text-ember-2 dark:text-ember" /> Nonaktifkan</>
+                : <><Power className="w-4 h-4 text-moss" /> Aktifkan kembali</>}
+            </button>
+            <button onClick={() => run(onDelete)} className={`${item} text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10`}>
+              <Trash2 className="w-4 h-4" /> Hapus
+            </button>
+          </div>
+        </>,
+        document.body
       )}
     </>
   );
@@ -73,7 +82,7 @@ function RowActions({ gear, onEdit, onToggle, onDelete }) {
 
 const EMPTY = {
   category_id: '', name: '', description: '', brand: '',
-  price_per_day: '', stock_total: '', image_url: '', weight_kg: '', is_available: true,
+  price_per_day: '', stock_total: '', image_url: '', images: '', weight_kg: '', is_available: true,
 };
 
 function GearForm({ open, onClose, categories, editing, onSaved }) {
@@ -91,6 +100,7 @@ function GearForm({ open, onClose, categories, editing, onSaved }) {
           price_per_day: editing.price_per_day || '',
           stock_total: editing.stock_total || '',
           image_url: editing.image_url || '',
+          images: (editing.images || []).join('\n'),
           weight_kg: editing.weight_kg || '',
           is_available: !!editing.is_available,
         }
@@ -110,6 +120,7 @@ function GearForm({ open, onClose, categories, editing, onSaved }) {
         stock_total: Number(form.stock_total),
         weight_kg: form.weight_kg ? Number(form.weight_kg) : null,
         image_url: form.image_url || null,
+        images: form.images ? form.images.split('\n').map((s) => s.trim()).filter(Boolean) : [],
         brand: form.brand || null,
         description: form.description || null,
       };
@@ -160,8 +171,11 @@ function GearForm({ open, onClose, categories, editing, onSaved }) {
             <input type="number" required min="1" value={form.stock_total} onChange={(e) => set('stock_total', e.target.value)} className={INPUT} placeholder="8" />
           </Field>
         </div>
-        <Field label="URL Gambar">
+        <Field label="URL Gambar Utama (cover)">
           <input type="url" value={form.image_url} onChange={(e) => set('image_url', e.target.value)} className={INPUT} placeholder="https://…" />
+        </Field>
+        <Field label="URL Gambar Tambahan (satu per baris, untuk galeri)">
+          <textarea rows={3} value={form.images} onChange={(e) => set('images', e.target.value)} className={INPUT} placeholder={'https://…\nhttps://…'} />
         </Field>
         <label className="flex items-center gap-2.5 cursor-pointer">
           <input type="checkbox" checked={form.is_available} onChange={(e) => set('is_available', e.target.checked)} className="w-4 h-4 rounded-sm accent-ember" />
@@ -177,6 +191,136 @@ function GearForm({ open, onClose, categories, editing, onSaved }) {
   );
 }
 
+// Add / edit / delete a gear's variants (size, color, per-variant stock).
+function VariantModal({ open, onClose, gear, onSaved }) {
+  const [variants, setVariants] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [draft, setDraft] = useState({ size: '', color: '', stock: '' });
+  const [busy, setBusy] = useState(false);
+
+  const load = async () => {
+    setLoading(true);
+    try {
+      const res = await api.get(`/gears/${gear.id}`);
+      setVariants(res.data.data?.variants || []);
+    } catch {
+      toast.error('Gagal memuat varian.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (open && gear) { setDraft({ size: '', color: '', stock: '' }); load(); }
+  }, [open, gear?.id]);
+
+  const addVariant = async () => {
+    if (!draft.size && !draft.color) { toast.error('Isi minimal ukuran atau warna.'); return; }
+    setBusy(true);
+    try {
+      await api.post(`/admin/gears/${gear.id}/variants`, {
+        size: draft.size || null,
+        color: draft.color || null,
+        stock: Number(draft.stock) || 0,
+      });
+      setDraft({ size: '', color: '', stock: '' });
+      await load();
+      onSaved?.();
+      toast.success('Varian ditambahkan.');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Gagal menambah varian.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const saveVariant = async (v) => {
+    setBusy(true);
+    try {
+      await api.put(`/admin/gears/${gear.id}/variants/${v.id}`, {
+        size: v.size || null,
+        color: v.color || null,
+        stock: Number(v.stock) || 0,
+      });
+      await load();
+      onSaved?.();
+      toast.success('Varian diperbarui.');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Gagal menyimpan varian.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const deleteVariant = async (v) => {
+    if (!window.confirm(`Hapus varian "${v.label}"?`)) return;
+    setBusy(true);
+    try {
+      await api.delete(`/admin/gears/${gear.id}/variants/${v.id}`);
+      await load();
+      onSaved?.();
+      toast.success('Varian dihapus.');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Gagal menghapus varian.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const setRow = (id, key, val) =>
+    setVariants((vs) => vs.map((v) => (v.id === id ? { ...v, [key]: val } : v)));
+
+  return (
+    <Modal open={open} onClose={onClose} title={`Varian — ${gear?.name || ''}`}>
+      <div className="space-y-4">
+        <p className="text-xs text-ink/55 dark:text-sand/60">
+          Varian untuk gear dengan ukuran/warna (mis. jaket, sepatu). Stok dilacak per varian. Kosongkan bila gear tanpa varian.
+        </p>
+
+        {loading ? (
+          <div className="space-y-2">{[...Array(3)].map((_, i) => <div key={i} className={`${SKEL} h-10`} />)}</div>
+        ) : (
+          <div className="space-y-2">
+            {variants.length === 0 && (
+              <p className="text-xs text-ink/45 dark:text-sand/45 py-2 text-center">Belum ada varian.</p>
+            )}
+            {variants.map((v) => (
+              <div key={v.id} className="grid grid-cols-[1fr_1fr_4.5rem_auto] gap-2 items-center">
+                <input value={v.size || ''} onChange={(e) => setRow(v.id, 'size', e.target.value)} placeholder="Ukuran" className={INPUT} />
+                <input value={v.color || ''} onChange={(e) => setRow(v.id, 'color', e.target.value)} placeholder="Warna" className={INPUT} />
+                <input type="number" min="0" value={v.stock} onChange={(e) => setRow(v.id, 'stock', e.target.value)} placeholder="Stok" className={INPUT} />
+                <div className="flex gap-1">
+                  <button onClick={() => saveVariant(v)} disabled={busy} title="Simpan" className="grid place-items-center w-9 h-9 rounded-md bg-ember/10 text-ember border-2 border-ember/20 hover:bg-ember/20 disabled:opacity-40">
+                    <Pencil className="w-4 h-4" />
+                  </button>
+                  <button onClick={() => deleteVariant(v)} disabled={busy} title="Hapus" className="grid place-items-center w-9 h-9 rounded-md bg-red-500/10 text-red-600 dark:text-red-400 border-2 border-red-500/20 hover:bg-red-500/20 disabled:opacity-40">
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Add row */}
+        <div className="pt-3 border-t-2 border-ink/10 dark:border-white/10">
+          <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-ink/60 dark:text-sand/60 mb-2">Tambah Varian</p>
+          <div className="grid grid-cols-[1fr_1fr_4.5rem_auto] gap-2 items-center">
+            <input value={draft.size} onChange={(e) => setDraft((d) => ({ ...d, size: e.target.value }))} placeholder="Ukuran" className={INPUT} />
+            <input value={draft.color} onChange={(e) => setDraft((d) => ({ ...d, color: e.target.value }))} placeholder="Warna" className={INPUT} />
+            <input type="number" min="0" value={draft.stock} onChange={(e) => setDraft((d) => ({ ...d, stock: e.target.value }))} placeholder="Stok" className={INPUT} />
+            <button onClick={addVariant} disabled={busy} className="grid place-items-center w-9 h-9 rounded-md bg-ember text-white shadow-md shadow-ember/20 hover:bg-ember-2 disabled:opacity-40">
+              <Plus className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+
+        <Btn type="button" variant="ghost" onClick={onClose} className="w-full">Selesai</Btn>
+      </div>
+    </Modal>
+  );
+}
+
 function AdminGears() {
   const [gears, setGears] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -184,6 +328,7 @@ function AdminGears() {
   const [q, setQ] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState(null);
+  const [variantGear, setVariantGear] = useState(null);
 
   const load = async () => {
     setLoading(true);
@@ -221,10 +366,10 @@ function AdminGears() {
   };
 
   const remove = async (gear) => {
-    if (!window.confirm(`Hapus PERMANEN "${gear.name}"? Tindakan ini tidak bisa dibatalkan.`)) return;
+    if (!window.confirm(`Hapus "${gear.name}"? Gear akan hilang dari katalog & dashboard (riwayat booking tetap aman).`)) return;
     try {
       await api.delete(`/admin/gears/${gear.id}`);
-      toast.success('Gear dihapus permanen.');
+      toast.success('Gear dihapus.');
       load();
     } catch (err) {
       toast.error(err.response?.data?.message || 'Gagal menghapus gear.');
@@ -279,7 +424,14 @@ function AdminGears() {
                     </td>
                     <td className="p-3">{g.category?.name || '—'}</td>
                     <td className="p-3 font-bold text-ember-2 dark:text-ember">{formatRupiah(g.price_per_day)}</td>
-                    <td className="p-3 font-mono">{g.stock_available}/{g.stock_total}</td>
+                    <td className="p-3 font-mono">
+                      {g.stock_available}/{g.stock_total}
+                      {g.variants_count > 0 && (
+                        <span className="ml-1.5 inline-flex items-center gap-1 text-[10px] text-trail" title={`${g.variants_count} varian`}>
+                          <Layers className="w-3 h-3" />{g.variants_count}
+                        </span>
+                      )}
+                    </td>
                     <td className="p-3">
                       <span className={`font-mono px-2 py-1 rounded-sm text-[10px] font-bold border uppercase tracking-wide ${g.is_available ? 'bg-moss/15 text-moss border-moss/30' : 'bg-ink/10 text-ink/50 dark:text-sand/50 border-ink/20 dark:border-white/20'}`}>
                         {g.is_available ? 'Aktif' : 'Nonaktif'}
@@ -298,6 +450,7 @@ function AdminGears() {
                         <RowActions
                           gear={g}
                           onEdit={() => openEdit(g)}
+                          onVariants={() => setVariantGear(g)}
                           onToggle={() => setAvailability(g, !g.is_available)}
                           onDelete={() => remove(g)}
                         />
@@ -312,6 +465,7 @@ function AdminGears() {
       </section>
 
       <GearForm open={modalOpen} onClose={() => setModalOpen(false)} categories={categories} editing={editing} onSaved={load} />
+      <VariantModal open={!!variantGear} gear={variantGear} onClose={() => setVariantGear(null)} onSaved={load} />
     </div>
   );
 }

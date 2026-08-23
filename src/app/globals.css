@@ -5,26 +5,36 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* ==========================================================================
-   GearNest — "Basecamp Modern" design tokens
+   Kembara.id — "Earth Tones" design tokens
+   Forest green base · campfire amber accents · warm sand canvas.
+   Token names are kept stable; only values changed, so the whole app rebrands
+   from a single source without touching component classNames.
    ========================================================================== */
 @theme {
-  --color-bone: #f6f3ee;
-  --color-bone-2: #ece6db;
-  --color-ink: #1e2a32;
-  --color-ink-2: #26333c;
-  --color-moss: #55624a;
-  --color-moss-2: #6a7a5c;
-  --color-bark: #6b4e34;
-  --color-sand: #cdaa7d;
-  --color-ember: #e58a26;
-  --color-ember-2: #c9741a;
-  --color-trail: #0f766e;
-  --color-trail-2: #2dd4bf;
-  --color-char: #12181c;
+  --color-bone: #fbf9f5;      /* Warm Sand Canvas — main background */
+  --color-bone-2: #efe8dc;    /* warm sand tint — hover / soft surfaces */
+  --color-ink: #1f382b;       /* Deep Forest Green — headings, dark chips, strong text */
+  --color-ink-2: #2d372e;     /* Charcoal Wood — secondary dark / body */
+  --color-moss: #2d6a4f;      /* Forest Emerald — success / active */
+  --color-moss-2: #3e7d5f;
+  --color-bark: #8c4a27;      /* Terracotta Clay — price / urgency accent */
+  --color-sand: #d9c4a0;      /* warm tan — light accent on dark surfaces */
+  --color-ember: #cc7a2e;     /* Campfire Amber — primary CTA (readable on white) */
+  --color-ember-2: #a85f1e;   /* deeper amber — CTA hover */
+  --color-trail: #3e5a44;     /* Pine Green — secondary accent / links */
+  --color-trail-2: #6c8c70;   /* Sage Mist — soft accent */
+  --color-char: #16261d;      /* deepest forest — hero / footer / sidebar surfaces */
+
+  /* Organic, touch-friendly corners (softened from the old sharp scale) */
+  --radius-sm: 0.375rem;      /* 6px  — small chips */
+  --radius-md: 0.625rem;      /* 10px — cards */
+  --radius-lg: 0.875rem;      /* 14px */
+  --radius-xl: 1rem;          /* 16px — buttons / large cards */
+  --radius-2xl: 1.25rem;      /* 20px */
 
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-oswald), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: ui-monospace, "SFMono-Regular", "Roboto Mono", monospace;
+  --font-display: var(--font-outfit), "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, "SFMono-Regular", "Roboto Mono", monospace;
 }
 
 :root {

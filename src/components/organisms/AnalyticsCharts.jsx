@@ -29,7 +29,7 @@ const shortDate = (s) => (s ? new Date(s).toLocaleDateString('id-ID', { day: 'nu
 
 function ChartCard({ title, children, empty }) {
   return (
-    <div className="bg-white dark:bg-[#1b2228] border-2 border-ink/10 dark:border-white/10 rounded-md p-6 space-y-4">
+    <div className="bg-white dark:bg-[#213026] border-2 border-ink/10 dark:border-white/10 rounded-md p-6 space-y-4">
       <h3 className="font-display font-bold uppercase text-ink dark:text-white text-base flex items-center gap-2">
         <BarChart3 className="w-5 h-5 text-ember" /> {title}
       </h3>
@@ -119,7 +119,7 @@ export default function AnalyticsCharts() {
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie data={data.status} dataKey="value" nameKey="name" innerRadius={55} outerRadius={90} paddingAngle={2}>
-              {data.status.map((s) => <Cell key={s.name} fill={s.color} stroke={isDark ? '#1b2228' : '#fff'} strokeWidth={2} />)}
+              {data.status.map((s) => <Cell key={s.name} fill={s.color} stroke={isDark ? '#213026' : '#fff'} strokeWidth={2} />)}
               <LabelList dataKey="value" position="outside" style={{ fontSize: 11, fill: axis, fontWeight: 700 }} />
             </Pie>
             <Tooltip content={<MoneyTooltip labelText={(p) => `${p.payload.name}: ${p.value} booking`} />} />

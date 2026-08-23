@@ -6,8 +6,8 @@ import {
 } from 'lucide-react';
 
 export const metadata = {
-  title: 'Cara Sewa — GearNest',
-  description: 'Cara menyewa alat outdoor di GearNest: pilih gear, atur jadwal & pengiriman, bayar otomatis, lalu berpetualang.',
+  title: 'Cara Sewa — Kembara.id',
+  description: 'Cara menyewa alat outdoor di Kembara.id: pilih gear, atur jadwal & pengiriman, bayar otomatis, lalu berpetualang.',
 };
 
 const STEPS = [
@@ -28,7 +28,7 @@ export default function AboutPage() {
   return (
     <div>
       {/* Header band */}
-      <section className="relative overflow-hidden bg-ink text-white gn-gridlines">
+      <section className="relative overflow-hidden bg-ink text-white gn-topo">
         <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-ember/20 blur-3xl pointer-events-none" />
         <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 text-center">
           <Reveal className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.22em] text-trail-2">
@@ -36,7 +36,7 @@ export default function AboutPage() {
           </Reveal>
           <Reveal as="h1" delay={80} className="mt-5 font-display font-bold uppercase leading-[0.95] tracking-tight"
             style={{ fontSize: 'clamp(2.25rem, 6vw, 4rem)' }}>
-            Cara Sewa di <span className="text-ember">GearNest</span>
+            Cara Sewa di <span className="text-ember">Kembara.id</span>
           </Reveal>
           <Reveal as="p" delay={140} className="mt-4 max-w-xl mx-auto text-sand/85 text-sm sm:text-base">
             Empat langkah mudah dari memilih gear sampai siap berangkat. Tanpa ribet, gear terawat, harga jujur.
@@ -75,7 +75,7 @@ export default function AboutPage() {
               <Store className="w-5 h-5 text-moss mt-0.5 shrink-0" />
               <div>
                 <h4 className="font-semibold text-ink text-sm">Ambil Mandiri (Pickup) — Gratis</h4>
-                <p className="text-xs text-ink/60">Ambil dan kembalikan gear langsung di basecamp GearNest.</p>
+                <p className="text-xs text-ink/60">Ambil dan kembalikan gear langsung di basecamp Kembara.id.</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
@@ -123,7 +123,7 @@ export default function AboutPage() {
 
       {/* CTA */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16">
-        <Reveal className="relative overflow-hidden rounded-xl bg-ink text-white px-8 py-12 sm:px-16 text-center gn-gridlines">
+        <Reveal className="relative overflow-hidden rounded-xl bg-ink text-white px-8 py-12 sm:px-16 text-center gn-topo">
           <div className="absolute -bottom-24 -left-16 w-80 h-80 rounded-full bg-ember/20 blur-3xl" />
           <div className="relative">
             <h2 className="font-display font-bold uppercase text-2xl sm:text-3xl">Siap sewa gear pertamamu?</h2>

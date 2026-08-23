@@ -92,7 +92,7 @@ function AccountInner() {
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
       {/* Command header */}
       <div className="relative overflow-hidden bg-char text-white rounded-xl border border-white/10 p-6 sm:p-9">
-        <div className="absolute inset-0 gn-gridlines opacity-50" />
+        <div className="absolute inset-0 gn-topo opacity-50" />
         <div className="absolute -top-24 -right-16 w-72 h-72 rounded-full bg-ember/25 blur-[90px]" />
         <div className="absolute -bottom-28 -left-16 w-72 h-72 rounded-full bg-trail/20 blur-[90px]" />
         <div className="relative flex flex-col sm:flex-row sm:items-end justify-between gap-5">
@@ -138,7 +138,7 @@ function AccountInner() {
           <div className="text-center py-16 bg-white border-2 border-dashed border-ink/15 rounded-md space-y-4">
             <ShoppingBag className="w-12 h-12 text-ink/20 mx-auto" />
             <h3 className="font-display font-bold uppercase text-lg text-ink">Belum Ada Riwayat</h3>
-            <p className="text-sm text-ink/55">Kamu belum pernah menyewa gear di GearNest.</p>
+            <p className="text-sm text-ink/55">Kamu belum pernah menyewa gear di Kembara.id.</p>
             <Link href="/gears" className="inline-block px-5 py-2.5 bg-ember text-white text-sm font-display font-semibold uppercase tracking-wide rounded-md">
               Mulai Sewa Sekarang
             </Link>

@@ -8,7 +8,7 @@ import BrandMark from '@/components/atoms/BrandMark';
 import { useAuthStore } from '@/store/useAuthStore';
 import {
   LayoutDashboard, CalendarCheck, Package, Tags,
-  ExternalLink, LogOut, Shield, Menu, BarChart3, Sun, Moon,
+  ExternalLink, LogOut, Shield, Menu, BarChart3, Sun, Moon, Truck,
 } from 'lucide-react';
 
 const AdminThemeContext = createContext({ isDark: false });
@@ -20,6 +20,7 @@ const NAV = [
   { href: '/admin/bookings', label: 'Booking', icon: CalendarCheck },
   { href: '/admin/gears', label: 'Kelola Gear', icon: Package },
   { href: '/admin/categories', label: 'Kategori', icon: Tags },
+  { href: '/admin/settings', label: 'Biaya Antar', icon: Truck },
 ];
 
 function SidebarInner({ user, pathname, onLogout, onNavigate }) {
@@ -123,7 +124,7 @@ export default function AdminShell({ title = 'Dashboard', children }) {
   return (
     <RequireAuth admin>
       <AdminThemeContext.Provider value={{ isDark }}>
-        <div className={`${isDark ? 'dark' : ''} min-h-screen bg-bone dark:bg-[#12171b]`}>
+        <div className={`${isDark ? 'dark' : ''} min-h-screen bg-bone dark:bg-[#16261d]`}>
           {/* Mobile backdrop */}
           <div
             onClick={() => setSidebarOpen(false)}
@@ -140,7 +141,7 @@ export default function AdminShell({ title = 'Dashboard', children }) {
               translate: 'none',
               transition: 'transform 0.3s cubic-bezier(0.76,0,0.24,1)',
             }}
-            className="fixed top-0 left-0 z-[60] h-screen w-64 flex flex-col bg-char gn-gridlines overflow-hidden"
+            className="fixed top-0 left-0 z-[60] h-screen w-64 flex flex-col bg-char gn-topo overflow-hidden"
           >
             <SidebarInner
               user={user}
@@ -158,7 +159,7 @@ export default function AdminShell({ title = 'Dashboard', children }) {
             }}
             className="min-h-screen flex flex-col"
           >
-            <header className="sticky top-0 z-30 bg-bone/85 dark:bg-[#12171b]/85 backdrop-blur-md border-b-2 border-ink/10 dark:border-white/10 h-16 flex items-center gap-3 px-4 sm:px-8">
+            <header className="sticky top-0 z-30 bg-bone/85 dark:bg-[#16261d]/85 backdrop-blur-md border-b-2 border-ink/10 dark:border-white/10 h-16 flex items-center gap-3 px-4 sm:px-8">
               <button
                 onClick={() => setSidebarOpen((o) => !o)}
                 aria-label={sidebarOpen ? 'Tutup sidebar' : 'Buka sidebar'}

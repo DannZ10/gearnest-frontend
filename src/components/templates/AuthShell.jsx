@@ -89,7 +89,7 @@ export default function AuthShell({ initialMode = 'login' }) {
             onError={(e) => { e.currentTarget.style.display = 'none'; }}
             className="absolute inset-0 w-full h-full object-cover opacity-35"
           />
-          <div className="absolute inset-0 gn-gridlines opacity-50" />
+          <div className="absolute inset-0 gn-topo opacity-50" />
           <div className="absolute inset-0 bg-gradient-to-tr from-char via-char/80 to-char/30" />
           <div className="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-ember/25 blur-[90px]" />
           <div className="absolute -bottom-28 -right-16 w-80 h-80 rounded-full bg-trail/25 blur-[90px]" />

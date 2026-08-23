@@ -112,7 +112,7 @@ function AdminCategories() {
           {categories.map((c) => (
             <div key={c.id} className={`${CARD} p-5 flex flex-col gap-4`}>
               <div className="flex items-start justify-between">
-                <span className="grid place-items-center w-10 h-10 rounded-md bg-ink text-ember dark:bg-white/5">
+                <span className="grid place-items-center w-10 h-10 rounded-md bg-ember/10 text-ember border border-ember/15 dark:bg-white/5 dark:border-transparent">
                   <Tags className="w-5 h-5" />
                 </span>
                 <span className="font-mono text-[10px] font-bold text-trail bg-trail/10 px-2 py-1 rounded-sm border border-trail/20 uppercase tracking-wide">

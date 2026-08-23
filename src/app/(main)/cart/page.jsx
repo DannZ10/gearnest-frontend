@@ -3,11 +3,12 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useCartStore } from '@/store/useCartStore';
+import api from '@/lib/axios';
+import { useCartStore, cartLineKey } from '@/store/useCartStore';
 import { useAuthStore } from '@/store/useAuthStore';
 import { formatRupiah } from '@/lib/format';
 import { toast } from 'sonner';
-import { ShoppingBag, Trash2, Plus, Minus, Calendar, Truck, Store, ArrowRight } from 'lucide-react';
+import { ShoppingBag, Trash2, Plus, Minus, Calendar, Truck, Store, ArrowRight, MapPin, Loader2, Navigation, MessageCircle, CreditCard } from 'lucide-react';
 
 export default function CartPage() {
   const router = useRouter();
@@ -18,12 +19,16 @@ export default function CartPage() {
     endDate,
     deliveryType,
     deliveryAddress,
+    deliveryMapsUrl,
     deliveryDistanceKm,
     removeItem,
     updateQuantity,
     setBookingDates,
     setDeliveryInfo,
+    setDeliveryQuote,
+    setPaymentMethod,
     getDurationDays,
+    getTotalWeightKg,
     getSubtotal,
     getDeliveryFee,
     getTotalPrice,
@@ -33,7 +38,9 @@ export default function CartPage() {
   const [localStartDate, setLocalStartDate] = useState(startDate || '');
   const [localEndDate, setLocalEndDate] = useState(endDate || '');
   const [localAddress, setLocalAddress] = useState(deliveryAddress || '');
-  const [localDistance, setLocalDistance] = useState(deliveryDistanceKm || 5);
+  const [localMapsUrl, setLocalMapsUrl] = useState(deliveryMapsUrl || '');
+  const [quoting, setQuoting] = useState(false);
+  const [quoteErr, setQuoteErr] = useState('');
 
   useEffect(() => {
     setMounted(true);
@@ -50,26 +57,58 @@ export default function CartPage() {
     }
   }, []);
 
+  const itemsSig = items.map((i) => `${i.gear.id}:${i.variant?.id || ''}:${i.quantity}`).join(',');
+
+  // Live delivery-fee quote (server-side distance from the Google Maps link + weight).
+  useEffect(() => {
+    if (!mounted) return;
+    if (deliveryType !== 'delivery' || !deliveryMapsUrl.trim() || items.length === 0) {
+      setQuoteErr('');
+      setDeliveryQuote({ distanceKm: 0, deliveryFee: 0 });
+      return;
+    }
+    const t = setTimeout(async () => {
+      setQuoting(true);
+      setQuoteErr('');
+      try {
+        const res = await api.post('/delivery/quote', {
+          delivery_type: 'delivery',
+          delivery_maps_url: deliveryMapsUrl,
+          items: items.map((i) => ({ gear_id: i.gear.id, quantity: i.quantity })),
+        });
+        const d = res.data.data;
+        setDeliveryQuote({ distanceKm: d.distance_km, deliveryFee: d.delivery_fee });
+      } catch (err) {
+        setQuoteErr(err.response?.data?.message || 'Gagal menghitung ongkir dari link tersebut.');
+        setDeliveryQuote({ distanceKm: 0, deliveryFee: 0 });
+      } finally {
+        setQuoting(false);
+      }
+    }, 600);
+    return () => clearTimeout(t);
+  }, [mounted, deliveryType, deliveryMapsUrl, itemsSig]);
+
   const handleDateChange = (start, end) => {
     setLocalStartDate(start);
     setLocalEndDate(end);
     setBookingDates(start, end);
   };
 
-  const handleDeliveryTypeChange = (type) => setDeliveryInfo(type, localAddress, localDistance);
+  const handleDeliveryTypeChange = (type) => setDeliveryInfo(type, localAddress, localMapsUrl);
 
   const handleAddressChange = (addr) => {
     setLocalAddress(addr);
-    setDeliveryInfo(deliveryType, addr, localDistance);
+    setDeliveryInfo(deliveryType, addr, localMapsUrl);
   };
 
-  const handleDistanceChange = (dist) => {
-    const num = Math.max(1, Number(dist) || 1);
-    setLocalDistance(num);
-    setDeliveryInfo(deliveryType, localAddress, num);
+  const handleMapsUrlChange = (url) => {
+    setLocalMapsUrl(url);
+    setDeliveryInfo(deliveryType, localAddress, url);
   };
 
-  const handleProceedCheckout = () => {
+  // Both payment choices go through checkout (identity is mandatory to create a
+  // booking). The chosen method decides the final action there: Midtrans vs WhatsApp.
+  const proceed = (method) => {
     if (!isAuthenticated) {
       toast.error('Silakan login terlebih dahulu untuk melakukan booking.');
       router.push('/login?redirect=/cart');
@@ -83,10 +122,13 @@ export default function CartPage() {
       toast.error('Pilih tanggal mulai dan selesai sewa!');
       return;
     }
-    if (deliveryType === 'delivery' && !localAddress.trim()) {
-      toast.error('Isi alamat pengiriman lengkap!');
-      return;
+    if (deliveryType === 'delivery') {
+      if (!localAddress.trim()) { toast.error('Isi alamat pengiriman lengkap!'); return; }
+      if (!localMapsUrl.trim()) { toast.error('Tempel link Google Maps lokasi pengiriman!'); return; }
+      if (quoting) { toast.error('Tunggu perhitungan ongkir selesai…'); return; }
+      if (deliveryDistanceKm <= 0) { toast.error('Ongkir belum terhitung. Pastikan link Google Maps valid.'); return; }
     }
+    setPaymentMethod(method);
     router.push('/checkout');
   };
 
@@ -170,7 +212,7 @@ export default function CartPage() {
                   <Store className="w-6 h-6 text-ember mt-1" />
                   <div>
                     <h4 className="font-bold text-sm text-ink">Ambil Mandiri (Pickup)</h4>
-                    <p className="text-xs text-ink/55 mt-0.5">Ambil di Basecamp GearNest (Gratis)</p>
+                    <p className="text-xs text-ink/55 mt-0.5">Ambil di Basecamp Kembara.id (Gratis)</p>
                     <span className="inline-block mt-2 font-bold text-xs text-moss">Rp 0</span>
                   </div>
                 </button>
@@ -188,7 +230,7 @@ export default function CartPage() {
                   <div>
                     <h4 className="font-bold text-sm text-ink">Layanan Antar</h4>
                     <p className="text-xs text-ink/55 mt-0.5">Dikirim langsung ke lokasimu</p>
-                    <span className="inline-block mt-2 font-bold text-xs text-ember-2">Rp 10.000 + Rp 3.000/km</span>
+                    <span className="inline-block mt-2 font-bold text-xs text-ember-2">Rp 10.000 (≤5km & ≤5kg) · +Rp 1.000 / km atau kg</span>
                   </div>
                 </button>
               </div>
@@ -206,15 +248,43 @@ export default function CartPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-ink/60 mb-1">Estimasi Jarak Pengiriman (km)</label>
+                    <label className="block text-xs font-medium text-ink/60 mb-1 flex items-center gap-1.5">
+                      <MapPin className="w-3.5 h-3.5 text-ember" /> Link Google Maps Lokasi Pengiriman
+                    </label>
                     <input
-                      type="number"
-                      min={1}
-                      max={50}
-                      value={localDistance}
-                      onChange={(e) => handleDistanceChange(e.target.value)}
+                      type="url"
+                      inputMode="url"
+                      placeholder="https://maps.app.goo.gl/… (share titik lokasi dari Google Maps)"
+                      value={localMapsUrl}
+                      onChange={(e) => handleMapsUrlChange(e.target.value)}
                       className="w-full bg-bone border border-ink/15 rounded-md px-4 py-2 text-sm text-ink focus:outline-none focus:border-ember"
                     />
+                    <p className="text-[11px] text-ink/45 mt-1">
+                      Buka Google Maps → cari lokasimu → <span className="font-semibold">Bagikan</span> → salin link, tempel di sini. Jarak & ongkir dihitung otomatis dari basecamp.
+                    </p>
+
+                    {/* Quote feedback */}
+                    <div className="mt-2">
+                      {quoting ? (
+                        <span className="inline-flex items-center gap-2 text-xs text-ink/60">
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" /> Menghitung jarak & ongkir…
+                        </span>
+                      ) : quoteErr ? (
+                        <span className="text-xs text-red-600 font-medium">{quoteErr}</span>
+                      ) : deliveryDistanceKm > 0 ? (
+                        <div className="flex flex-wrap gap-2 text-[11px]">
+                          <span className="inline-flex items-center gap-1.5 font-mono uppercase tracking-wide bg-trail/10 border border-trail/20 text-trail px-2.5 py-1 rounded-sm">
+                            <Navigation className="w-3.5 h-3.5" /> {deliveryDistanceKm} km
+                          </span>
+                          <span className="inline-flex items-center gap-1.5 font-mono uppercase tracking-wide bg-bone border border-ink/10 text-ink/70 px-2.5 py-1 rounded-sm">
+                            {getTotalWeightKg().toFixed(1)} kg
+                          </span>
+                          <span className="inline-flex items-center gap-1.5 font-mono uppercase tracking-wide bg-ember/10 border border-ember/20 text-ember-2 px-2.5 py-1 rounded-sm font-bold">
+                            Ongkir {formatRupiah(getDeliveryFee())}
+                          </span>
+                        </div>
+                      ) : null}
+                    </div>
                   </div>
                 </div>
               )}
@@ -224,40 +294,53 @@ export default function CartPage() {
             <div className="bg-white border-2 border-ink/10 rounded-md p-6 space-y-4">
               <h3 className="font-display font-semibold uppercase tracking-wide text-ink text-base">Daftar Gear</h3>
               <div className="divide-y divide-ink/10">
-                {items.map((item) => (
-                  <div key={item.gear.id} className="py-4 flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-4">
-                      <img
-                        src={item.gear.image_url || 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?w=200&auto=format&fit=crop&q=80'}
-                        alt={item.gear.name}
-                        className="w-16 h-16 object-cover rounded-md border-2 border-ink/10"
-                      />
-                      <div>
-                        <h4 className="font-semibold text-ink text-sm line-clamp-1">{item.gear.name}</h4>
-                        <p className="text-xs text-ember-2 font-semibold mt-0.5">{formatRupiah(item.gear.price_per_day)} / hari</p>
+                {items.map((item) => {
+                  const key = cartLineKey(item.gear.id, item.variant?.id);
+                  const maxStock = item.variant ? Number(item.variant.stock ?? 0) : Number(item.gear.stock_available ?? 0);
+                  return (
+                    <div key={key} className="py-4 flex items-center justify-between gap-4">
+                      <div className="flex items-center gap-4 min-w-0">
+                        <img
+                          src={item.gear.image_url || 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?w=200&auto=format&fit=crop&q=80'}
+                          alt={item.gear.name}
+                          className="w-16 h-16 object-cover rounded-md border-2 border-ink/10 shrink-0"
+                        />
+                        <div className="min-w-0">
+                          <h4 className="font-semibold text-ink text-sm line-clamp-1">{item.gear.name}</h4>
+                          {item.variant && (
+                            <span className="inline-block mt-0.5 font-mono text-[10px] uppercase tracking-wide bg-ember/10 text-ember-2 px-2 py-0.5 rounded-sm border border-ember/20">
+                              {item.variant.label}
+                            </span>
+                          )}
+                          <p className="text-xs text-ember-2 font-semibold mt-0.5">{formatRupiah(item.gear.price_per_day)} / hari</p>
+                        </div>
                       </div>
-                    </div>
 
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center gap-2 bg-bone border-2 border-ink/10 rounded-md p-1">
-                        <button onClick={() => updateQuantity(item.gear.id, item.quantity - 1)} className="p-1 text-ink/50 hover:text-ink">
-                          <Minus className="w-3.5 h-3.5" />
-                        </button>
-                        <span className="text-xs font-bold text-ink px-2">{item.quantity}</span>
-                        <button onClick={() => updateQuantity(item.gear.id, item.quantity + 1)} className="p-1 text-ink/50 hover:text-ink">
-                          <Plus className="w-3.5 h-3.5" />
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2 bg-bone border-2 border-ink/10 rounded-md p-1">
+                          <button onClick={() => updateQuantity(key, item.quantity - 1)} className="p-1 text-ink/50 hover:text-ink">
+                            <Minus className="w-3.5 h-3.5" />
+                          </button>
+                          <span className="text-xs font-bold text-ink px-2">{item.quantity}</span>
+                          <button
+                            onClick={() => updateQuantity(key, item.quantity + 1)}
+                            disabled={item.quantity >= maxStock}
+                            className="p-1 text-ink/50 hover:text-ink disabled:opacity-30"
+                          >
+                            <Plus className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                        <button
+                          onClick={() => removeItem(key)}
+                          className="p-2 text-ink/40 hover:text-red-600 transition-colors"
+                          title="Hapus"
+                        >
+                          <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
-                      <button
-                        onClick={() => removeItem(item.gear.id)}
-                        className="p-2 text-ink/40 hover:text-red-600 transition-colors"
-                        title="Hapus"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -268,20 +351,44 @@ export default function CartPage() {
               <h3 className="font-display font-bold uppercase text-ink text-lg border-b border-ink/10 pb-4">Ringkasan Biaya</h3>
               <div className="space-y-3 text-xs">
                 <Row label="Total Unit Gear:" value={`${items.reduce((acc, i) => acc + i.quantity, 0)} Unit`} />
+                <Row label="Berat Total:" value={`${getTotalWeightKg().toFixed(1)} kg`} />
                 <Row label="Durasi Sewa:" value={`${getDurationDays()} Hari`} />
                 <Row label="Subtotal Sewa:" value={formatRupiah(getSubtotal())} />
-                <Row label="Biaya Pengiriman:" value={deliveryType === 'pickup' ? 'Gratis (Pickup)' : formatRupiah(getDeliveryFee())} />
+                <Row
+                  label="Biaya Pengiriman:"
+                  value={
+                    deliveryType === 'pickup'
+                      ? 'Gratis (Pickup)'
+                      : quoting
+                        ? 'Menghitung…'
+                        : deliveryDistanceKm > 0
+                          ? formatRupiah(getDeliveryFee())
+                          : 'Isi link Maps'
+                  }
+                />
                 <div className="pt-3 border-t border-ink/10 flex justify-between items-center text-sm">
                   <span className="font-bold text-ink">Total Pembayaran:</span>
                   <span className="font-display font-bold text-ember-2 text-lg">{formatRupiah(getTotalPrice())}</span>
                 </div>
               </div>
-              <button
-                onClick={handleProceedCheckout}
-                className="w-full py-3.5 bg-ember hover:bg-ember-2 text-white font-display font-semibold uppercase tracking-wide rounded-md shadow-lg shadow-ember/25 transition-all flex items-center justify-center gap-2 text-sm"
-              >
-                Lanjut ke Checkout <ArrowRight className="w-4 h-4" />
-              </button>
+              <div className="space-y-2.5">
+                <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-ink/45 text-center">Pilih Metode Pembayaran</p>
+                <button
+                  onClick={() => proceed('online')}
+                  className="w-full py-3.5 bg-ember hover:bg-ember-2 text-white font-display font-semibold uppercase tracking-wide rounded-md shadow-lg shadow-ember/25 transition-all flex items-center justify-center gap-2 text-sm"
+                >
+                  <CreditCard className="w-4 h-4" /> Bayar Online <ArrowRight className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => proceed('onsite')}
+                  className="w-full py-3.5 bg-[#25D366] hover:bg-[#1ebe5b] text-white font-display font-semibold uppercase tracking-wide rounded-md shadow-lg shadow-[#25D366]/25 transition-all flex items-center justify-center gap-2 text-sm"
+                >
+                  <MessageCircle className="w-4 h-4" /> Bayar di Tempat
+                </button>
+                <p className="text-[11px] text-ink/45 text-center leading-relaxed">
+                  <span className="font-semibold text-ink/60">Bayar di Tempat</span>: konfirmasi ke admin via WhatsApp, bayar saat serah terima gear.
+                </p>
+              </div>
             </div>
           </div>
         </div>

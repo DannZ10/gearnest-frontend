@@ -70,7 +70,7 @@ function AdminDashboard() {
         {QUICK.map((q) => (
           <Link key={q.href} href={q.href} className={`group ${CARD} p-5 hover:border-ember transition-colors flex flex-col gap-4`}>
             <div className="flex items-center justify-between">
-              <span className="grid place-items-center w-10 h-10 rounded-md bg-ink text-ember dark:bg-white/5">
+              <span className="grid place-items-center w-10 h-10 rounded-md bg-ember/10 text-ember border border-ember/15 dark:bg-white/5 dark:border-transparent">
                 <q.icon className="w-5 h-5" />
               </span>
               <ArrowUpRight className="w-5 h-5 text-ink/30 dark:text-white/30 group-hover:text-ember transition-colors" />

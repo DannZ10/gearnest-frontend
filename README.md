@@ -1,4 +1,4 @@
-# ⛰️ GearNest Web — Outdoor Rental Web Application (Frontend)
+# ⛰️ Kembara.id Web — Outdoor Rental Web Application (Frontend)
 
 [![Next.js](https://img.shields.io/badge/Next.js-16.x-black?style=for-the-badge&logo=next.js)](https://nextjs.org)
 [![React](https://img.shields.io/badge/React-19.x-61DAFB?style=for-the-badge&logo=react)](https://react.dev)
@@ -6,7 +6,7 @@
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-38BDF8?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com)
 [![Zustand](https://img.shields.io/badge/State-Zustand-orange?style=for-the-badge)](https://github.com/pmndrs/zustand)
 
-**GearNest Web** adalah antarmuka web modern untuk platform sewa perlengkapan outdoor & peralatan gunung. Dibangun menggunakan **Next.js App Router murni JavaScript (`.js` & `.jsx`)**, **Tailwind CSS v4**, **Zustand State Management**, **Axios**, dan integrasi pembayaran otomatis **Midtrans Snap**.
+**Kembara.id Web** adalah antarmuka web modern untuk platform sewa perlengkapan outdoor & peralatan gunung. Dibangun menggunakan **Next.js App Router murni JavaScript (`.js` & `.jsx`)**, **Tailwind CSS v4**, **Zustand State Management**, **Axios**, dan integrasi pembayaran otomatis **Midtrans Snap**.
 
 ---
 
@@ -24,7 +24,7 @@
 ## 📁 Struktur Proyek (JavaScript `.js` / `.jsx`)
 
 ```text
-gearnest-web/
+kembara-web/
 ├── public/                # Static assets & logos
 ├── src/
 │   ├── app/               # Next.js App Router Pages
@@ -62,15 +62,17 @@ gearnest-web/
 
 ### 1. Clone & Install Dependencies
 ```bash
-git clone https://github.com/DannZ10/gearnest-frontend.git gearnest-web
-cd gearnest-web
+git clone https://github.com/DannZ10/kembara-frontend.git kembara-web
+cd kembara-web
 npm install
 ```
 
 ### 2. Konfigurasi Environment File (`.env.local`)
-Buat file `.env.local` di root folder `gearnest-web`:
+Buat file `.env.local` di root folder `kembara-web`:
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:8000/api
+# Nomor WhatsApp admin untuk konfirmasi "Bayar di Tempat" (format internasional, tanpa +)
+NEXT_PUBLIC_ADMIN_WHATSAPP=6281217409277
 ```
 
 ### 3. Menjalankan Server Development

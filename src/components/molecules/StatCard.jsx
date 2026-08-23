@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
  */
 export default function StatCard({ icon: Icon, label, value, accent = 'text-ember', stripe = 'bg-ember' }) {
   return (
-    <div className="relative overflow-hidden rounded-md border-2 border-ink/10 dark:border-white/10 bg-white dark:bg-[#1b2228] p-5">
+    <div className="relative overflow-hidden rounded-md border-2 border-ink/10 dark:border-white/10 bg-white dark:bg-[#213026] p-5">
       <span className={cn('absolute left-0 top-0 bottom-0 w-1', stripe)} />
       <div className="flex items-start justify-between">
         <div>

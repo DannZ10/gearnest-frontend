@@ -11,7 +11,7 @@ const FEATURES = [
 export default function Footer() {
   return (
     <footer className="relative bg-char text-white/80 mt-24 overflow-hidden">
-      <div className="absolute inset-0 gn-gridlines opacity-40" />
+      <div className="absolute inset-0 gn-topo opacity-70" />
 
       {/* Feature highlights */}
       <div className="relative border-b-2 border-white/10">
@@ -34,17 +34,17 @@ export default function Footer() {
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 grid grid-cols-1 md:grid-cols-4 gap-10">
         <div>
           <Link href="/" className="flex items-center gap-2.5 mb-4 group">
-            <span className="grid place-items-center w-10 h-10 rounded-md bg-ember text-char group-hover:-translate-y-0.5 transition-transform">
+            <span className="grid place-items-center w-10 h-10 rounded-xl bg-ember text-char group-hover:-translate-y-0.5 transition-transform">
               <Mountain className="w-5 h-5" strokeWidth={2.5} />
             </span>
-            <span className="font-display font-bold text-xl tracking-wide text-white">
-              GEAR<span className="text-ember">NEST</span>
+            <span className="font-display font-extrabold text-xl tracking-tight text-white">
+              Kembara<span className="text-ember">.id</span>
             </span>
           </Link>
           <p className="text-xs text-white/60 leading-relaxed mb-4 max-w-xs">
-            Basecamp tepercaya untuk gear terawat dan petualangan tak terlupakan. Proses mudah, pembayaran otomatis Midtrans.
+            Eksplorasi alam dengan perlengkapan terbaik. Sewa gear terawat, proses mudah, pembayaran otomatis Midtrans.
           </p>
-          <p className="font-mono text-[11px] text-white/40">© 2026 GearNest. All rights reserved.</p>
+          <p className="font-mono text-[11px] text-white/40">© 2026 Kembara.id. All rights reserved.</p>
         </div>
 
         <FooterCol
@@ -81,7 +81,7 @@ export default function Footer() {
 
       <div className="relative border-t-2 border-white/10 py-5 text-center">
         <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-white/45">
-          Your Gear. Your Nest. Your Adventure.
+          Eksplorasi Alam dengan Perlengkapan Terbaik.
         </p>
       </div>
     </footer>

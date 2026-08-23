@@ -18,9 +18,10 @@ const SLIDES = [
 const INTERVAL = 30000;
 
 const FIELD_SPECS = [
-  { value: '200+', label: 'Gear Premium' },
-  { value: '50+', label: 'Titik Destinasi' },
-  { value: '4.9', label: 'Rating Pendaki' },
+  { value: '40+', label: 'Perlengkapan Tersedia' },
+  { value: '20+', label: 'Pelanggan Aktif' },
+  { value: '100+', label: 'Booking' },
+  { value: '4.8', label: 'Pelanggan Puas' },
 ];
 
 export default function HeroSection() {
@@ -92,7 +93,7 @@ export default function HeroSection() {
         ))}
       </div>
 
-      <div className="absolute inset-0 gn-gridlines opacity-60 pointer-events-none" />
+      <div className="absolute inset-0 gn-topo opacity-90 pointer-events-none" />
       <div className="absolute inset-0 bg-gradient-to-tr from-char via-char/85 to-char/30 pointer-events-none" />
       <div ref={glowRef} className="absolute -top-32 -right-20 w-[28rem] h-[28rem] rounded-full bg-ember/25 blur-[100px] pointer-events-none" />
       <div className="absolute -bottom-40 -left-24 w-[30rem] h-[30rem] rounded-full bg-trail/25 blur-[110px] pointer-events-none" />
@@ -107,7 +108,7 @@ export default function HeroSection() {
         <div className="max-w-4xl">
           <div ref={tagRef} className="flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-[11px] uppercase tracking-[0.2em] text-white/55">
             <span className="inline-flex items-center gap-2 text-trail-2">
-              <span className="w-1.5 h-1.5 bg-trail-2 rounded-full gn-float" /> Basecamp GearNest
+              <span className="w-1.5 h-1.5 bg-trail-2 rounded-full gn-float" /> Basecamp Kembara.id
             </span>
             <span className="inline-flex items-center gap-1.5"><Navigation className="w-3 h-3" /> S 07.25&deg; &middot; E 112.75&deg;</span>
             <span className="hidden sm:inline">EST — MMXXVI</span>
@@ -123,7 +124,7 @@ export default function HeroSection() {
           </h1>
 
           <p ref={subRef} className="mt-6 max-w-lg text-white/70 text-base sm:text-lg leading-relaxed">
-            Sewa perlengkapan outdoor kelas ekspedisi — tenda, carrier, sleeping bag, dan gear teknis — terawat, teruji, siap tempur untuk setiap medan.
+            Sewa perlengkapan outdoor terjangkau dan terawat. Tersedia Tenda, Carrier, Sleeping Bag, Alat Masak, Pakaian, dan Peralatan Pendukung lainnya.
           </p>
 
           <div ref={ctaRef} className="mt-9 flex flex-wrap items-center gap-3">
@@ -149,7 +150,7 @@ export default function HeroSection() {
           ref={specRef}
           className="mt-14 sm:mt-20 border-t-2 border-white/15 flex items-stretch justify-between gap-4"
         >
-          <div className="grid grid-cols-3 flex-1 divide-x divide-white/10">
+          <div className="grid grid-cols-2 sm:grid-cols-4 flex-1 divide-x divide-white/10">
             {FIELD_SPECS.map((s, i) => (
               <div key={s.label} className="py-5 sm:py-6 px-2 sm:px-6 first:pl-0">
                 <div className="flex items-baseline gap-2">

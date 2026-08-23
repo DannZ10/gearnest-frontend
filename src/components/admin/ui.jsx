@@ -3,10 +3,10 @@
 import React, { useEffect } from 'react';
 import { X } from 'lucide-react';
 
-export const CARD = 'bg-white dark:bg-[#1b2228] border-2 border-ink/10 dark:border-white/10 rounded-md';
+export const CARD = 'bg-white dark:bg-[#213026] border-2 border-ink/10 dark:border-white/10 rounded-md';
 export const SKEL = 'bg-bone-2 dark:bg-white/5 animate-pulse rounded-md';
 export const INPUT =
-  'w-full bg-bone dark:bg-[#12171b] border-2 border-ink/15 dark:border-white/15 rounded-md px-3 py-2 text-sm text-ink dark:text-white focus:outline-none focus:border-ember transition-colors';
+  'w-full bg-bone dark:bg-[#16261d] border-2 border-ink/15 dark:border-white/15 rounded-md px-3 py-2 text-sm text-ink dark:text-white focus:outline-none focus:border-ember transition-colors';
 
 export function SectionHead({ eyebrow, title, action }) {
   return (
@@ -46,7 +46,7 @@ export function Modal({ open, onClose, title, children }) {
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-50 bg-char/75 backdrop-blur-sm flex items-start justify-center p-4 overflow-y-auto">
-      <div className="w-full max-w-lg my-8 bg-white dark:bg-[#1b2228] border-2 border-ink/10 dark:border-white/10 rounded-md shadow-2xl">
+      <div className="w-full max-w-lg my-8 bg-white dark:bg-[#213026] border-2 border-ink/10 dark:border-white/10 rounded-md shadow-2xl">
         <div className="flex items-center justify-between px-5 py-4 border-b-2 border-ink/10 dark:border-white/10">
           <h3 className="font-display font-bold uppercase tracking-tight text-ink dark:text-white text-lg">{title}</h3>
           <button onClick={onClose} className="p-1.5 text-ink/40 dark:text-sand/50 hover:text-ink dark:hover:text-white">
