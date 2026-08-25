@@ -12,3 +12,10 @@ export const formatDate = (dateString) => {
   const options = { year: 'numeric', month: 'short', day: 'numeric' };
   return new Date(dateString).toLocaleDateString('id-ID', options);
 };
+
+export const formatDateTime = (dateString) => {
+  if (!dateString) return '-';
+  return new Date(dateString).toLocaleString('id-ID', {
+    day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
+  });
+};

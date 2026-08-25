@@ -6,7 +6,8 @@ import { formatRupiah, formatDate } from '@/lib/format';
 import { toast } from 'sonner';
 import AdminShell from '@/components/organisms/AdminShell';
 import { CARD, SKEL, INPUT, SectionHead } from '@/components/admin/ui';
-import { Search, ShieldCheck, ShieldAlert, Pencil } from 'lucide-react';
+import BookingInvoice from '@/components/organisms/BookingInvoice';
+import { Search, ShieldCheck, ShieldAlert, Pencil, FileText } from 'lucide-react';
 
 const STATUSES = ['pending', 'confirmed', 'active', 'returned', 'cancelled'];
 
@@ -23,6 +24,7 @@ function AdminBookings() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('');
+  const [invoice, setInvoice] = useState(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -64,6 +66,16 @@ function AdminBookings() {
     }
   };
 
+  const toggleIdentityReturned = async (id, current) => {
+    try {
+      await api.patch(`/admin/bookings/${id}/identity-returned`, { returned: !current });
+      toast.success('Status pengembalian jaminan diperbarui.');
+      load();
+    } catch (err) {
+      toast.error('Gagal memperbarui status jaminan.');
+    }
+  };
+
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       <SectionHead eyebrow="// 03 — Transaksi" title="Kelola Booking" />
@@ -100,6 +112,7 @@ function AdminBookings() {
                   <th className="p-3">Periode</th>
                   <th className="p-3">Total</th>
                   <th className="p-3">Jaminan ID <span className="normal-case font-sans font-normal text-ink/35 dark:text-sand/35">(klik utk ubah)</span></th>
+                  <th className="p-3">Serah Terima</th>
                   <th className="p-3">Status</th>
                   <th className="p-3 text-right">Ubah Status</th>
                 </tr>
@@ -133,18 +146,46 @@ function AdminBookings() {
                       </button>
                     </td>
                     <td className="p-3">
+                      <div className="space-y-1.5">
+                        <div className="font-mono text-[10px] text-ink/55 dark:text-sand/55 leading-tight">
+                          <div>{b.picked_up_at ? `Diambil ${formatDate(b.picked_up_at)}` : 'Belum diambil'}</div>
+                          <div>{b.returned_at ? `Kembali ${formatDate(b.returned_at)}` : `Tempo ${formatDate(b.end_date)}`}</div>
+                        </div>
+                        <button
+                          onClick={() => toggleIdentityReturned(b.id, b.identity_returned)}
+                          title="Klik untuk ubah status pengembalian kartu jaminan"
+                          className={`inline-flex items-center gap-1 font-mono px-2 py-1 rounded-sm text-[10px] font-bold border uppercase tracking-wide cursor-pointer transition-colors ${
+                            b.identity_returned
+                              ? 'bg-moss/15 text-moss dark:text-moss-2 border-moss/30 hover:bg-moss/25'
+                              : 'bg-ink/5 text-ink/50 dark:text-sand/50 border-ink/15 dark:border-white/15 hover:bg-ink/10'
+                          }`}
+                        >
+                          {b.identity_returned ? 'Jaminan kembali ✓' : 'Jaminan di kami'}
+                        </button>
+                      </div>
+                    </td>
+                    <td className="p-3">
                       <span className={`font-mono px-2 py-1 rounded-sm text-[10px] font-bold border uppercase tracking-wide ${STATUS_STYLE[b.status] || STATUS_STYLE.pending}`}>
                         {b.status}
                       </span>
                     </td>
                     <td className="p-3 text-right">
-                      <select
-                        value={b.status}
-                        onChange={(e) => updateStatus(b.id, e.target.value)}
-                        className="bg-bone dark:bg-[#16261d] border-2 border-ink/15 dark:border-white/15 rounded-md px-2 py-1 text-xs text-ink dark:text-white focus:outline-none focus:border-ember capitalize"
-                      >
-                        {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
-                      </select>
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => setInvoice(b)}
+                          title="Cetak invoice"
+                          className="grid place-items-center w-8 h-8 rounded-md border-2 border-ink/10 dark:border-white/15 text-ink/70 dark:text-sand hover:border-ember/40 hover:text-ember transition-colors"
+                        >
+                          <FileText className="w-4 h-4" />
+                        </button>
+                        <select
+                          value={b.status}
+                          onChange={(e) => updateStatus(b.id, e.target.value)}
+                          className="bg-bone dark:bg-[#16261d] border-2 border-ink/15 dark:border-white/15 rounded-md px-2 py-1 text-xs text-ink dark:text-white focus:outline-none focus:border-ember capitalize"
+                        >
+                          {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
+                        </select>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -153,6 +194,8 @@ function AdminBookings() {
           </div>
         )}
       </section>
+
+      {invoice && <BookingInvoice booking={invoice} onClose={() => setInvoice(null)} />}
     </div>
   );
 }

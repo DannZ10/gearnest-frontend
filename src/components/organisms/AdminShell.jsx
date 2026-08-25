@@ -8,7 +8,7 @@ import BrandMark from '@/components/atoms/BrandMark';
 import { useAuthStore } from '@/store/useAuthStore';
 import {
   LayoutDashboard, CalendarCheck, Package, Tags,
-  ExternalLink, LogOut, Shield, Menu, BarChart3, Sun, Moon, Truck,
+  ExternalLink, LogOut, Shield, Menu, BarChart3, Sun, Moon, Truck, History,
 } from 'lucide-react';
 
 const AdminThemeContext = createContext({ isDark: false });
@@ -20,6 +20,7 @@ const NAV = [
   { href: '/admin/bookings', label: 'Booking', icon: CalendarCheck },
   { href: '/admin/gears', label: 'Kelola Gear', icon: Package },
   { href: '/admin/categories', label: 'Kategori', icon: Tags },
+  { href: '/admin/activity', label: 'Aktivitas', icon: History },
   { href: '/admin/settings', label: 'Biaya Antar', icon: Truck },
 ];
 

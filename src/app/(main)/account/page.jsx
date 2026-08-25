@@ -4,11 +4,11 @@ import React, { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import api from '@/lib/axios';
 import { useAuthStore } from '@/store/useAuthStore';
-import { formatRupiah, formatDate } from '@/lib/format';
+import { formatRupiah, formatDate, formatDateTime } from '@/lib/format';
 import { toast } from 'sonner';
 import RequireAuth from '@/components/templates/RequireAuth';
 import CountUp from '@/components/atoms/CountUp';
-import { ShoppingBag, CreditCard, Printer, X, Mountain, Package, Compass, Clock, Wallet } from 'lucide-react';
+import { ShoppingBag, CreditCard, Printer, X, Mountain, Package, Compass, Clock, Wallet, History } from 'lucide-react';
 
 function StatusBadge({ status }) {
   const map = {
@@ -184,6 +184,40 @@ function AccountInner() {
                   </div>
                 </div>
 
+                {['confirmed', 'active', 'returned'].includes(booking.status) && (
+                  <div className="rounded-sm border-2 border-ink/10 bg-bone/60 p-3 text-[11px] space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-ink/55 font-mono uppercase tracking-wide text-[10px]">Pengembalian &amp; Jaminan</span>
+                      {!booking.returned_at && new Date(booking.end_date) < new Date(new Date().toDateString()) && (
+                        <span className="font-bold text-red-600">⚠ Lewat jatuh tempo</span>
+                      )}
+                    </div>
+                    <div className="flex flex-wrap gap-x-4 gap-y-1 text-ink/70">
+                      <span>Serah terima: <b className="text-ink">{booking.returned_at ? `Dikembalikan ${formatDate(booking.returned_at)}` : booking.picked_up_at ? `Diambil ${formatDate(booking.picked_up_at)}` : 'Belum diambil'}</b></span>
+                      <span>Jatuh tempo: <b className="text-ink">{formatDate(booking.end_date)}</b></span>
+                      <span>Jaminan: <b className={booking.identity_returned ? 'text-moss' : 'text-ember-2'}>{booking.identity_returned ? 'sudah dikembalikan' : `${[booking.identity_type_1, booking.identity_type_2].filter(Boolean).join(' + ') || '2 dokumen'} di basecamp`}</b></span>
+                    </div>
+                    <p className="text-ink/45">Kembalikan gear sebelum jatuh tempo di basecamp Kembara.id, lalu ambil kembali kartu identitas jaminanmu.</p>
+                  </div>
+                )}
+
+                {booking.activities?.length > 0 && (
+                  <details className="text-xs">
+                    <summary className="cursor-pointer font-mono text-[10px] uppercase tracking-wide text-ink/50 hover:text-ember flex items-center gap-1.5 select-none">
+                      <History className="w-3.5 h-3.5" /> Riwayat Aktivitas ({booking.activities.length})
+                    </summary>
+                    <ol className="mt-2.5 border-l-2 border-ink/10 ml-1.5 space-y-2.5">
+                      {booking.activities.map((a) => (
+                        <li key={a.id} className="relative pl-4">
+                          <span className="absolute -left-[5px] top-1.5 w-2 h-2 rounded-full bg-ember" />
+                          <p className="text-ink/70">{a.description}</p>
+                          <p className="font-mono text-[10px] text-ink/40">{formatDateTime(a.created_at)}{a.actor?.name ? ` · ${a.actor.name}` : ''}</p>
+                        </li>
+                      ))}
+                    </ol>
+                  </details>
+                )}
+
                 <div className="pt-1 flex flex-wrap items-center justify-between gap-3">
                   <button
                     onClick={() => setSelectedReceipt(booking)}
@@ -218,7 +252,7 @@ function AccountInner() {
             <div className="text-center space-y-2 border-b-2 border-ink/10 pb-4">
               <div className="inline-flex items-center gap-2 font-display font-bold text-xl uppercase tracking-tight">
                 <Mountain className="w-6 h-6 text-ember" />
-                <span className="text-ink">GEAR<span className="text-ember">NEST</span></span>
+                <span className="text-ink">Kembara<span className="text-ember">.id</span></span>
               </div>
               <h3 className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-ink/50">Nota Transaksi Persewaan</h3>
               <p className="font-mono text-sm text-ember-2 font-bold">{selectedReceipt.booking_code}</p>

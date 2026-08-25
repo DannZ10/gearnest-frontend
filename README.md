@@ -17,7 +17,10 @@
 - 🛒 **Keranjang Sewa Dinamis**: Pemilihan tanggal mulai/selesai sewa, kalkulator durasi hari, opsi **Ambil Mandiri (Pickup)** vs **Layanan Antar (Delivery Rp 10.000 + Rp 3.000/km)**, manajemen kuantitas gear, dan rincian biaya.
 - 💳 **Checkout & Midtrans Integration**: Ringkasan penyewa, persetujuan jaminan identitas KTP/SIM, catatan khusus, dan peluncuran pembayaran instan via Midtrans Snap.
 - 📋 **Dashboard Customer**: Riwayat booking sewa, indikator status (`pending`, `confirmed`, `active`, `returned`, `cancelled`), dan tombol bayar ulang.
-- 🛡️ **Dashboard Admin Control Panel**: Ringkasan omset & statistik, peringatan stok menipis (≤ 3 unit), ranking gear terpopuler, pengubah status booking, dan toggle verifikasi identitas jaminan.
+- 🔁 **Pengembalian & Jaminan**: Panel serah-terima (tanggal ambil/kembali, jatuh tempo, peringatan lewat tempo) dan status kartu jaminan identitas per booking.
+- 🕓 **Riwayat Aktivitas**: Timeline audit per booking untuk customer, dan halaman feed aktivitas terpusat untuk admin.
+- 🔓 **Login Google (OAuth)**: Masuk / daftar via akun Google (`/auth/callback`), berdampingan dengan login email/password.
+- 🛡️ **Dashboard Admin Control Panel**: Ringkasan omset & statistik, peringatan stok menipis (≤ 3 unit), ranking gear terpopuler, pengubah status booking, toggle verifikasi & pengembalian jaminan identitas, dan **cetak invoice** printable per booking.
 
 ---
 
