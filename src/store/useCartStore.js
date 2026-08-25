@@ -110,7 +110,7 @@ export const useCartStore = create(
       getTotalPrice: () => get().getSubtotal() + get().getDeliveryFee(),
     }),
     {
-      name: 'gearnest-cart-store',
+      name: 'kembara-cart-store',
     }
   )
 );

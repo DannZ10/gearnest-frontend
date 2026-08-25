@@ -93,5 +93,5 @@ npm run build
 
 ## 🔑 Kredensial Demo Cepat
 
-- **Admin Account**: `admin@gearnest.com` / `admin123`
-- **Customer Account**: `customer@gearnest.com` / `customer123`
+- **Admin Account**: `admin@kembara.com` / `admin123`
+- **Customer Account**: `customer@kembara.com` / `customer123`

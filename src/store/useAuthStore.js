@@ -24,7 +24,7 @@ export const useAuthStore = create(
         }),
     }),
     {
-      name: 'gearnest-auth-store',
+      name: 'kembara-auth-store',
     }
   )
 );

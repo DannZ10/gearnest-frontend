@@ -1,4 +1,4 @@
-# GearNest Web — Next.js 16 (React 19)
+# Kembara.id Web — Next.js 16 (React 19)
 FROM node:22-alpine AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
