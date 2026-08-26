@@ -7,7 +7,8 @@ import { toast } from 'sonner';
 import AdminShell from '@/components/organisms/AdminShell';
 import { CARD, SKEL, INPUT, SectionHead } from '@/components/admin/ui';
 import BookingInvoice from '@/components/organisms/BookingInvoice';
-import { Search, ShieldCheck, ShieldAlert, Pencil, FileText } from 'lucide-react';
+import BookingActivityModal from '@/components/organisms/BookingActivityModal';
+import { Search, ShieldCheck, ShieldAlert, Pencil, FileText, Activity } from 'lucide-react';
 
 const STATUSES = ['pending', 'confirmed', 'active', 'returned', 'cancelled'];
 
@@ -25,6 +26,7 @@ function AdminBookings() {
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('');
   const [invoice, setInvoice] = useState(null);
+  const [activityBooking, setActivityBooking] = useState(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -114,7 +116,7 @@ function AdminBookings() {
                   <th className="p-3">Jaminan ID <span className="normal-case font-sans font-normal text-ink/35 dark:text-sand/35">(klik utk ubah)</span></th>
                   <th className="p-3">Serah Terima</th>
                   <th className="p-3">Status</th>
-                  <th className="p-3 text-right">Ubah Status</th>
+                  <th className="p-3 text-right">Aksi</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-ink/10 dark:divide-white/10">
@@ -172,6 +174,13 @@ function AdminBookings() {
                     <td className="p-3 text-right">
                       <div className="flex items-center justify-end gap-2">
                         <button
+                          onClick={() => setActivityBooking(b)}
+                          title="Lihat aktivitas"
+                          className="grid place-items-center w-8 h-8 rounded-md border-2 border-ink/10 dark:border-white/15 text-ink/70 dark:text-sand hover:border-ember/40 hover:text-ember transition-colors"
+                        >
+                          <Activity className="w-4 h-4" />
+                        </button>
+                        <button
                           onClick={() => setInvoice(b)}
                           title="Cetak invoice"
                           className="grid place-items-center w-8 h-8 rounded-md border-2 border-ink/10 dark:border-white/15 text-ink/70 dark:text-sand hover:border-ember/40 hover:text-ember transition-colors"
@@ -196,6 +205,7 @@ function AdminBookings() {
       </section>
 
       {invoice && <BookingInvoice booking={invoice} onClose={() => setInvoice(null)} />}
+      {activityBooking && <BookingActivityModal booking={activityBooking} onClose={() => setActivityBooking(null)} />}
     </div>
   );
 }

@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import api from '@/lib/axios';
 import { useCartStore, cartLineKey } from '@/store/useCartStore';
 import { useAuthStore } from '@/store/useAuthStore';
-import { formatRupiah } from '@/lib/format';
+import { rupiah } from '@/lib/useReveal';
 import { toast } from 'sonner';
 import { ShoppingBag, Trash2, Plus, Minus, Calendar, Truck, Store, ArrowRight, MapPin, Loader2, Navigation, MessageCircle, CreditCard } from 'lucide-react';
 
@@ -14,24 +14,9 @@ export default function CartPage() {
   const router = useRouter();
   const { isAuthenticated } = useAuthStore();
   const {
-    items,
-    startDate,
-    endDate,
-    deliveryType,
-    deliveryAddress,
-    deliveryMapsUrl,
-    deliveryDistanceKm,
-    removeItem,
-    updateQuantity,
-    setBookingDates,
-    setDeliveryInfo,
-    setDeliveryQuote,
-    setPaymentMethod,
-    getDurationDays,
-    getTotalWeightKg,
-    getSubtotal,
-    getDeliveryFee,
-    getTotalPrice,
+    items, startDate, endDate, deliveryType, deliveryAddress, deliveryMapsUrl, deliveryDistanceKm,
+    removeItem, updateQuantity, setBookingDates, setDeliveryInfo, setDeliveryQuote, setPaymentMethod,
+    getDurationDays, getTotalWeightKg, getSubtotal, getDeliveryFee, getTotalPrice,
   } = useCartStore();
 
   const [mounted, setMounted] = useState(false);
@@ -45,35 +30,27 @@ export default function CartPage() {
   useEffect(() => {
     setMounted(true);
     if (!startDate || !endDate) {
-      const tomorrow = new Date();
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      const threeDays = new Date();
-      threeDays.setDate(threeDays.getDate() + 3);
-      const sStr = tomorrow.toISOString().split('T')[0];
-      const eStr = threeDays.toISOString().split('T')[0];
-      setLocalStartDate(sStr);
-      setLocalEndDate(eStr);
-      setBookingDates(sStr, eStr);
+      const t = new Date(); t.setDate(t.getDate() + 1);
+      const e = new Date(); e.setDate(e.getDate() + 3);
+      const sStr = t.toISOString().split('T')[0];
+      const eStr = e.toISOString().split('T')[0];
+      setLocalStartDate(sStr); setLocalEndDate(eStr); setBookingDates(sStr, eStr);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const itemsSig = items.map((i) => `${i.gear.id}:${i.variant?.id || ''}:${i.quantity}`).join(',');
 
-  // Live delivery-fee quote (server-side distance from the Google Maps link + weight).
   useEffect(() => {
     if (!mounted) return;
     if (deliveryType !== 'delivery' || !deliveryMapsUrl.trim() || items.length === 0) {
-      setQuoteErr('');
-      setDeliveryQuote({ distanceKm: 0, deliveryFee: 0 });
-      return;
+      setQuoteErr(''); setDeliveryQuote({ distanceKm: 0, deliveryFee: 0 }); return;
     }
     const t = setTimeout(async () => {
-      setQuoting(true);
-      setQuoteErr('');
+      setQuoting(true); setQuoteErr('');
       try {
         const res = await api.post('/delivery/quote', {
-          delivery_type: 'delivery',
-          delivery_maps_url: deliveryMapsUrl,
+          delivery_type: 'delivery', delivery_maps_url: deliveryMapsUrl,
           items: items.map((i) => ({ gear_id: i.gear.id, quantity: i.quantity })),
         });
         const d = res.data.data;
@@ -81,207 +58,99 @@ export default function CartPage() {
       } catch (err) {
         setQuoteErr(err.response?.data?.message || 'Gagal menghitung ongkir dari link tersebut.');
         setDeliveryQuote({ distanceKm: 0, deliveryFee: 0 });
-      } finally {
-        setQuoting(false);
-      }
+      } finally { setQuoting(false); }
     }, 600);
     return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mounted, deliveryType, deliveryMapsUrl, itemsSig]);
 
-  const handleDateChange = (start, end) => {
-    setLocalStartDate(start);
-    setLocalEndDate(end);
-    setBookingDates(start, end);
-  };
-
+  const handleDateChange = (start, end) => { setLocalStartDate(start); setLocalEndDate(end); setBookingDates(start, end); };
   const handleDeliveryTypeChange = (type) => setDeliveryInfo(type, localAddress, localMapsUrl);
+  const handleAddressChange = (addr) => { setLocalAddress(addr); setDeliveryInfo(deliveryType, addr, localMapsUrl); };
+  const handleMapsUrlChange = (url) => { setLocalMapsUrl(url); setDeliveryInfo(deliveryType, localAddress, url); };
 
-  const handleAddressChange = (addr) => {
-    setLocalAddress(addr);
-    setDeliveryInfo(deliveryType, addr, localMapsUrl);
-  };
-
-  const handleMapsUrlChange = (url) => {
-    setLocalMapsUrl(url);
-    setDeliveryInfo(deliveryType, localAddress, url);
-  };
-
-  // Both payment choices go through checkout (identity is mandatory to create a
-  // booking). The chosen method decides the final action there: Midtrans vs WhatsApp.
   const proceed = (method) => {
-    if (!isAuthenticated) {
-      toast.error('Silakan login terlebih dahulu untuk melakukan booking.');
-      router.push('/login?redirect=/cart');
-      return;
-    }
-    if (items.length === 0) {
-      toast.error('Keranjang sewa Anda masih kosong!');
-      return;
-    }
-    if (!localStartDate || !localEndDate) {
-      toast.error('Pilih tanggal mulai dan selesai sewa!');
-      return;
-    }
+    if (!isAuthenticated) { toast.error('Silakan login dulu untuk booking.'); router.push('/login?redirect=/cart'); return; }
+    if (items.length === 0) { toast.error('Keranjang masih kosong!'); return; }
+    if (!localStartDate || !localEndDate) { toast.error('Pilih tanggal mulai & selesai sewa!'); return; }
     if (deliveryType === 'delivery') {
-      if (!localAddress.trim()) { toast.error('Isi alamat pengiriman lengkap!'); return; }
-      if (!localMapsUrl.trim()) { toast.error('Tempel link Google Maps lokasi pengiriman!'); return; }
+      if (!localAddress.trim()) { toast.error('Isi alamat pengiriman!'); return; }
+      if (!localMapsUrl.trim()) { toast.error('Tempel link Google Maps lokasi!'); return; }
       if (quoting) { toast.error('Tunggu perhitungan ongkir selesai…'); return; }
-      if (deliveryDistanceKm <= 0) { toast.error('Ongkir belum terhitung. Pastikan link Google Maps valid.'); return; }
+      if (deliveryDistanceKm <= 0) { toast.error('Ongkir belum terhitung. Pastikan link valid.'); return; }
     }
-    setPaymentMethod(method);
-    router.push('/checkout');
+    setPaymentMethod(method); router.push('/checkout');
   };
 
   if (!mounted) return null;
 
-  const dateCls =
-    'w-full bg-bone border border-ink/15 rounded-md px-4 py-2.5 text-sm text-ink focus:outline-none focus:border-ember';
-
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
-      <div>
-        <p className="font-mono text-xs uppercase tracking-[0.22em] text-trail mb-3">// Keranjang</p>
-        <h1 className="font-display font-bold uppercase text-4xl sm:text-5xl leading-[0.9] tracking-tight text-ink">Keranjang Sewa</h1>
-        <p className="text-sm text-ink/60 mt-3">Atur tanggal sewa, jumlah unit, dan metode pengiriman.</p>
+    <div className="container" style={{ padding: '48px 0 88px' }}>
+      <div className="section-head">
+        <span className="eyebrow">Keranjang</span>
+        <h2 className="h2">Keranjang <span className="accent">Sewa</span></h2>
+        <p className="lead">Atur tanggal sewa, jumlah unit, dan metode pengiriman.</p>
       </div>
 
       {items.length === 0 ? (
-        <div className="text-center py-20 bg-white border-2 border-ink/10 rounded-md space-y-4">
-          <ShoppingBag className="w-16 h-16 text-ink/25 mx-auto" />
-          <h3 className="font-display font-bold uppercase text-xl text-ink">Keranjang Sewa Kosong</h3>
-          <p className="text-sm text-ink/55 max-w-sm mx-auto">Kamu belum menambahkan peralatan outdoor ke keranjang.</p>
-          <Link
-            href="/gears"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-ember text-white font-display font-semibold uppercase tracking-wide text-sm rounded-md hover:bg-ember-2 transition-all"
-          >
-            Pilih Alat Outdoor
-          </Link>
+        <div className="empty-state" style={{ background: 'var(--surface-card)', border: '1px solid var(--neutral-200)', borderRadius: 'var(--r-xl)' }}>
+          <ShoppingBag size={48} style={{ margin: '0 auto 14px', color: 'var(--neutral-400)' }} />
+          <strong>Keranjang sewa kosong</strong>
+          Kamu belum menambahkan perlengkapan ke keranjang.
+          <div style={{ marginTop: 18 }}><Link href="/gears" className="btn btn-primary">Pilih Perlengkapan</Link></div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left */}
-          <div className="lg:col-span-2 space-y-6">
+        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.7fr) minmax(0,.9fr)', gap: 32, alignItems: 'start' }} className="cart-grid">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
             {/* Dates */}
-            <div className="bg-white border-2 border-ink/10 rounded-md p-6 space-y-4">
-              <h3 className="font-display font-semibold uppercase tracking-wide text-ink text-base flex items-center gap-2">
-                <Calendar className="w-5 h-5 text-ember" /> Atur Tanggal Sewa
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-medium text-ink/60 mb-1">Tanggal Mulai Sewa</label>
-                  <input
-                    type="date"
-                    min={new Date().toISOString().split('T')[0]}
-                    value={localStartDate}
-                    onChange={(e) => handleDateChange(e.target.value, localEndDate)}
-                    className={dateCls}
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-ink/60 mb-1">Tanggal Selesai Sewa</label>
-                  <input
-                    type="date"
-                    min={localStartDate || new Date().toISOString().split('T')[0]}
-                    value={localEndDate}
-                    onChange={(e) => handleDateChange(localStartDate, e.target.value)}
-                    className={dateCls}
-                  />
-                </div>
+            <div className="panel">
+              <h3 className="panel-h"><Calendar size={18} /> Atur Tanggal Sewa</h3>
+              <div className="field-row">
+                <div className="field"><label>Tanggal Mulai</label><input type="date" min={new Date().toISOString().split('T')[0]} value={localStartDate} onChange={(e) => handleDateChange(e.target.value, localEndDate)} /></div>
+                <div className="field"><label>Tanggal Selesai</label><input type="date" min={localStartDate || new Date().toISOString().split('T')[0]} value={localEndDate} onChange={(e) => handleDateChange(localStartDate, e.target.value)} /></div>
               </div>
-              <div className="p-3 bg-bone rounded-md border-2 border-ink/10 flex items-center justify-between text-xs">
-                <span className="text-ink/60">Total Durasi Sewa:</span>
-                <span className="font-display font-bold text-ember-2">{getDurationDays()} Hari</span>
-              </div>
+              <div className="dur-note"><span>Total durasi sewa</span><b>{getDurationDays()} hari</b></div>
             </div>
 
             {/* Delivery */}
-            <div className="bg-white border-2 border-ink/10 rounded-md p-6 space-y-4">
-              <h3 className="font-display font-semibold uppercase tracking-wide text-ink text-base flex items-center gap-2">
-                <Truck className="w-5 h-5 text-ember" /> Metode Pengiriman
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <button
-                  type="button"
-                  onClick={() => handleDeliveryTypeChange('pickup')}
-                  className={`p-4 rounded-md border text-left flex items-start gap-3 transition-all ${
-                    deliveryType === 'pickup'
-                      ? 'bg-ember/10 border-ember text-ink'
-                      : 'bg-bone border-ink/10 text-ink/60 hover:border-ink/25'
-                  }`}
-                >
-                  <Store className="w-6 h-6 text-ember mt-1" />
-                  <div>
-                    <h4 className="font-bold text-sm text-ink">Ambil Mandiri (Pickup)</h4>
-                    <p className="text-xs text-ink/55 mt-0.5">Ambil di Basecamp Kembara.id (Gratis)</p>
-                    <span className="inline-block mt-2 font-bold text-xs text-moss">Rp 0</span>
-                  </div>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => handleDeliveryTypeChange('delivery')}
-                  className={`p-4 rounded-md border text-left flex items-start gap-3 transition-all ${
-                    deliveryType === 'delivery'
-                      ? 'bg-ember/10 border-ember text-ink'
-                      : 'bg-bone border-ink/10 text-ink/60 hover:border-ink/25'
-                  }`}
-                >
-                  <Truck className="w-6 h-6 text-ember mt-1" />
-                  <div>
-                    <h4 className="font-bold text-sm text-ink">Layanan Antar</h4>
-                    <p className="text-xs text-ink/55 mt-0.5">Dikirim langsung ke lokasimu</p>
-                    <span className="inline-block mt-2 font-bold text-xs text-ember-2">Rp 10.000 (≤5km & ≤5kg) · +Rp 1.000 / km atau kg</span>
-                  </div>
-                </button>
+            <div className="panel">
+              <h3 className="panel-h"><Truck size={18} /> Metode Pengiriman</h3>
+              <div className="radio-group">
+                <div className="radio-card">
+                  <input type="radio" name="delivery" id="cPickup" checked={deliveryType === 'pickup'} onChange={() => handleDeliveryTypeChange('pickup')} />
+                  <label className="rc-body" htmlFor="cPickup">
+                    <span className="rc-icon"><Store size={20} /></span>
+                    <span><span className="rc-title">Pickup</span><br /><span className="rc-sub">Ambil di basecamp · Gratis</span></span>
+                    <span className="rc-check" />
+                  </label>
+                </div>
+                <div className="radio-card">
+                  <input type="radio" name="delivery" id="cDelivery" checked={deliveryType === 'delivery'} onChange={() => handleDeliveryTypeChange('delivery')} />
+                  <label className="rc-body" htmlFor="cDelivery">
+                    <span className="rc-icon"><Truck size={20} /></span>
+                    <span><span className="rc-title">Delivery</span><br /><span className="rc-sub">Antar ke lokasi · Berbayar</span></span>
+                    <span className="rc-check" />
+                  </label>
+                </div>
               </div>
 
               {deliveryType === 'delivery' && (
-                <div className="space-y-3 pt-2">
-                  <div>
-                    <label className="block text-xs font-medium text-ink/60 mb-1">Alamat Lengkap Pengiriman</label>
-                    <textarea
-                      rows={2}
-                      placeholder="Nama jalan, nomor rumah, RT/RW, dan patokan..."
-                      value={localAddress}
-                      onChange={(e) => handleAddressChange(e.target.value)}
-                      className="w-full bg-bone border border-ink/15 rounded-md px-4 py-2 text-sm text-ink focus:outline-none focus:border-ember"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-ink/60 mb-1 flex items-center gap-1.5">
-                      <MapPin className="w-3.5 h-3.5 text-ember" /> Link Google Maps Lokasi Pengiriman
-                    </label>
-                    <input
-                      type="url"
-                      inputMode="url"
-                      placeholder="https://maps.app.goo.gl/… (share titik lokasi dari Google Maps)"
-                      value={localMapsUrl}
-                      onChange={(e) => handleMapsUrlChange(e.target.value)}
-                      className="w-full bg-bone border border-ink/15 rounded-md px-4 py-2 text-sm text-ink focus:outline-none focus:border-ember"
-                    />
-                    <p className="text-[11px] text-ink/45 mt-1">
-                      Buka Google Maps → cari lokasimu → <span className="font-semibold">Bagikan</span> → salin link, tempel di sini. Jarak & ongkir dihitung otomatis dari basecamp.
-                    </p>
-
-                    {/* Quote feedback */}
-                    <div className="mt-2">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginTop: 14 }}>
+                  <div className="field"><label>Alamat Lengkap Pengiriman</label><textarea rows={2} placeholder="Nama jalan, nomor, RT/RW, patokan…" value={localAddress} onChange={(e) => handleAddressChange(e.target.value)} /></div>
+                  <div className="field">
+                    <label><MapPin size={14} style={{ display: 'inline', verticalAlign: '-2px', color: 'var(--accent-cta)' }} /> Link Google Maps Lokasi</label>
+                    <input type="url" inputMode="url" placeholder="https://maps.app.goo.gl/…" value={localMapsUrl} onChange={(e) => handleMapsUrlChange(e.target.value)} />
+                    <p style={{ fontSize: 11, color: 'var(--neutral-400)', marginTop: 2 }}>Google Maps → cari lokasi → <b>Bagikan</b> → salin link. Jarak &amp; ongkir dihitung otomatis dari basecamp.</p>
+                    <div style={{ marginTop: 6 }}>
                       {quoting ? (
-                        <span className="inline-flex items-center gap-2 text-xs text-ink/60">
-                          <Loader2 className="w-3.5 h-3.5 animate-spin" /> Menghitung jarak & ongkir…
-                        </span>
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--neutral-400)' }}><Loader2 size={14} className="spin" /> Menghitung jarak &amp; ongkir…</span>
                       ) : quoteErr ? (
-                        <span className="text-xs text-red-600 font-medium">{quoteErr}</span>
+                        <span className="form-error" style={{ display: 'inline-block' }}>{quoteErr}</span>
                       ) : deliveryDistanceKm > 0 ? (
-                        <div className="flex flex-wrap gap-2 text-[11px]">
-                          <span className="inline-flex items-center gap-1.5 font-mono uppercase tracking-wide bg-trail/10 border border-trail/20 text-trail px-2.5 py-1 rounded-sm">
-                            <Navigation className="w-3.5 h-3.5" /> {deliveryDistanceKm} km
-                          </span>
-                          <span className="inline-flex items-center gap-1.5 font-mono uppercase tracking-wide bg-bone border border-ink/10 text-ink/70 px-2.5 py-1 rounded-sm">
-                            {getTotalWeightKg().toFixed(1)} kg
-                          </span>
-                          <span className="inline-flex items-center gap-1.5 font-mono uppercase tracking-wide bg-ember/10 border border-ember/20 text-ember-2 px-2.5 py-1 rounded-sm font-bold">
-                            Ongkir {formatRupiah(getDeliveryFee())}
-                          </span>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                          <span className="chip"><Navigation size={13} /> {deliveryDistanceKm} km</span>
+                          <span className="chip">{getTotalWeightKg().toFixed(1)} kg</span>
+                          <span className="chip chip-amber">Ongkir {rupiah(getDeliveryFee())}</span>
                         </div>
                       ) : null}
                     </div>
@@ -291,52 +160,29 @@ export default function CartPage() {
             </div>
 
             {/* Items */}
-            <div className="bg-white border-2 border-ink/10 rounded-md p-6 space-y-4">
-              <h3 className="font-display font-semibold uppercase tracking-wide text-ink text-base">Daftar Gear</h3>
-              <div className="divide-y divide-ink/10">
+            <div className="panel">
+              <h3 className="panel-h">Daftar Gear</h3>
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
                 {items.map((item) => {
                   const key = cartLineKey(item.gear.id, item.variant?.id);
                   const maxStock = item.variant ? Number(item.variant.stock ?? 0) : Number(item.gear.stock_available ?? 0);
                   return (
-                    <div key={key} className="py-4 flex items-center justify-between gap-4">
-                      <div className="flex items-center gap-4 min-w-0">
-                        <img
-                          src={item.gear.image_url || 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?w=200&auto=format&fit=crop&q=80'}
-                          alt={item.gear.name}
-                          className="w-16 h-16 object-cover rounded-md border-2 border-ink/10 shrink-0"
-                        />
-                        <div className="min-w-0">
-                          <h4 className="font-semibold text-ink text-sm line-clamp-1">{item.gear.name}</h4>
-                          {item.variant && (
-                            <span className="inline-block mt-0.5 font-mono text-[10px] uppercase tracking-wide bg-ember/10 text-ember-2 px-2 py-0.5 rounded-sm border border-ember/20">
-                              {item.variant.label}
-                            </span>
-                          )}
-                          <p className="text-xs text-ember-2 font-semibold mt-0.5">{formatRupiah(item.gear.price_per_day)} / hari</p>
+                    <div key={key} className="cart-line">
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 14, minWidth: 0 }}>
+                        <img src={item.gear.image_url || '/img/tenda-dome.webp'} alt={item.gear.name} className="cart-thumb" onError={(e) => { e.currentTarget.src = '/img/tenda-dome.webp'; }} />
+                        <div style={{ minWidth: 0 }}>
+                          <h4 className="cart-name">{item.gear.name}</h4>
+                          {item.variant && <span className="variant-badge">{item.variant.label}</span>}
+                          <p className="cart-price">{rupiah(item.gear.price_per_day)} / hari</p>
                         </div>
                       </div>
-
-                      <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-2 bg-bone border-2 border-ink/10 rounded-md p-1">
-                          <button onClick={() => updateQuantity(key, item.quantity - 1)} className="p-1 text-ink/50 hover:text-ink">
-                            <Minus className="w-3.5 h-3.5" />
-                          </button>
-                          <span className="text-xs font-bold text-ink px-2">{item.quantity}</span>
-                          <button
-                            onClick={() => updateQuantity(key, item.quantity + 1)}
-                            disabled={item.quantity >= maxStock}
-                            className="p-1 text-ink/50 hover:text-ink disabled:opacity-30"
-                          >
-                            <Plus className="w-3.5 h-3.5" />
-                          </button>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                        <div className="qty-stepper">
+                          <button onClick={() => updateQuantity(key, item.quantity - 1)} aria-label="Kurangi"><Minus size={14} strokeWidth={2.5} /></button>
+                          <span className="qty-val">{item.quantity}</span>
+                          <button onClick={() => updateQuantity(key, item.quantity + 1)} disabled={item.quantity >= maxStock} aria-label="Tambah"><Plus size={14} strokeWidth={2.5} /></button>
                         </div>
-                        <button
-                          onClick={() => removeItem(key)}
-                          className="p-2 text-ink/40 hover:text-red-600 transition-colors"
-                          title="Hapus"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                        <button onClick={() => removeItem(key)} className="icon-danger" title="Hapus"><Trash2 size={16} /></button>
                       </div>
                     </div>
                   );
@@ -345,63 +191,22 @@ export default function CartPage() {
             </div>
           </div>
 
-          {/* Summary */}
-          <div className="h-fit sticky top-24">
-            <div className="bg-white border-2 border-ink/10 rounded-md p-6 space-y-6 shadow-xl shadow-ink/5">
-              <h3 className="font-display font-bold uppercase text-ink text-lg border-b border-ink/10 pb-4">Ringkasan Biaya</h3>
-              <div className="space-y-3 text-xs">
-                <Row label="Total Unit Gear:" value={`${items.reduce((acc, i) => acc + i.quantity, 0)} Unit`} />
-                <Row label="Berat Total:" value={`${getTotalWeightKg().toFixed(1)} kg`} />
-                <Row label="Durasi Sewa:" value={`${getDurationDays()} Hari`} />
-                <Row label="Subtotal Sewa:" value={formatRupiah(getSubtotal())} />
-                <Row
-                  label="Biaya Pengiriman:"
-                  value={
-                    deliveryType === 'pickup'
-                      ? 'Gratis (Pickup)'
-                      : quoting
-                        ? 'Menghitung…'
-                        : deliveryDistanceKm > 0
-                          ? formatRupiah(getDeliveryFee())
-                          : 'Isi link Maps'
-                  }
-                />
-                <div className="pt-3 border-t border-ink/10 flex justify-between items-center text-sm">
-                  <span className="font-bold text-ink">Total Pembayaran:</span>
-                  <span className="font-display font-bold text-ember-2 text-lg">{formatRupiah(getTotalPrice())}</span>
-                </div>
-              </div>
-              <div className="space-y-2.5">
-                <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-ink/45 text-center">Pilih Metode Pembayaran</p>
-                <button
-                  onClick={() => proceed('online')}
-                  className="w-full py-3.5 bg-ember hover:bg-ember-2 text-white font-display font-semibold uppercase tracking-wide rounded-md shadow-lg shadow-ember/25 transition-all flex items-center justify-center gap-2 text-sm"
-                >
-                  <CreditCard className="w-4 h-4" /> Bayar Online <ArrowRight className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => proceed('onsite')}
-                  className="w-full py-3.5 bg-[#25D366] hover:bg-[#1ebe5b] text-white font-display font-semibold uppercase tracking-wide rounded-md shadow-lg shadow-[#25D366]/25 transition-all flex items-center justify-center gap-2 text-sm"
-                >
-                  <MessageCircle className="w-4 h-4" /> Bayar di Tempat
-                </button>
-                <p className="text-[11px] text-ink/45 text-center leading-relaxed">
-                  <span className="font-semibold text-ink/60">Bayar di Tempat</span>: konfirmasi ke admin via WhatsApp, bayar saat serah terima gear.
-                </p>
-              </div>
-            </div>
+          {/* Summary (dark) */}
+          <div className="summary gn-topo" style={{ position: 'sticky', top: 96 }}>
+            <h4>Ringkasan Biaya</h4>
+            <p className="s-sub">Perkiraan total sewa kamu</p>
+            <div className="sum-line"><span className="k">Total unit</span><span className="v">{items.reduce((a, i) => a + i.quantity, 0)} unit</span></div>
+            <div className="sum-line"><span className="k">Berat total</span><span className="v">{getTotalWeightKg().toFixed(1)} kg</span></div>
+            <div className="sum-line"><span className="k">Durasi sewa</span><span className="v">{getDurationDays()} hari</span></div>
+            <div className="sum-line"><span className="k">Subtotal</span><span className="v">{rupiah(getSubtotal())}</span></div>
+            <div className="sum-line"><span className="k">Ongkir</span><span className="v">{deliveryType === 'pickup' ? 'Gratis' : quoting ? '…' : deliveryDistanceKm > 0 ? rupiah(getDeliveryFee()) : 'Isi link'}</span></div>
+            <div className="sum-line total"><span className="k">Total</span><span className="v">{rupiah(getTotalPrice())}</span></div>
+            <button className="btn btn-primary" style={{ width: '100%', marginTop: 16 }} onClick={() => proceed('online')}><CreditCard size={16} /> Bayar Online <ArrowRight size={16} className="arrow" /></button>
+            <button className="btn" style={{ width: '100%', marginTop: 10, background: '#25D366', color: '#fff' }} onClick={() => proceed('onsite')}><MessageCircle size={16} /> Bayar di Tempat</button>
+            <p className="sum-note"><b>Bayar di Tempat</b>: konfirmasi admin via WhatsApp, bayar saat serah terima gear.</p>
           </div>
         </div>
       )}
-    </div>
-  );
-}
-
-function Row({ label, value }) {
-  return (
-    <div className="flex justify-between text-ink/60">
-      <span>{label}</span>
-      <span className="font-semibold text-ink">{value}</span>
     </div>
   );
 }

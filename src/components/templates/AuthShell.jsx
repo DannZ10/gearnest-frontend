@@ -33,7 +33,10 @@ function GoogleIcon({ className }) {
 export default function AuthShell({ initialMode = 'login' }) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirect = searchParams.get('redirect') || '/';
+  // Open-redirect guard: only same-origin paths are honored. Absolute URLs,
+  // protocol-relative '//', and backslash tricks all fall back to '/'.
+  const rawRedirect = searchParams.get('redirect') || '/';
+  const redirect = /^\/(?!\/)[^\s]*$/.test(rawRedirect) && !rawRedirect.includes('\\') ? rawRedirect : '/';
   const setAuth = useAuthStore((s) => s.setAuth);
 
   const [mode, setMode] = useState(initialMode);
@@ -99,7 +102,7 @@ export default function AuthShell({ initialMode = 'login' }) {
       >
         <div className="relative h-full overflow-hidden flex flex-col justify-between p-12 bg-char">
           <img
-            src="/hero.png"
+            src="/img/hero.webp"
             alt=""
             aria-hidden="true"
             onError={(e) => { e.currentTarget.style.display = 'none'; }}

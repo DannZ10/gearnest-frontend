@@ -18,9 +18,10 @@ function CallbackInner() {
     done.current = true;
 
     const error = params.get('error');
-    const token = params.get('token');
+    // One-time exchange code — the raw token never touches the URL.
+    const code = params.get('code');
 
-    if (error || !token) {
+    if (error || !code) {
       toast.error('Login Google gagal. Silakan coba lagi.');
       router.replace('/login');
       return;
@@ -28,10 +29,10 @@ function CallbackInner() {
 
     (async () => {
       try {
-        // Seed the token so the axios interceptor attaches it, then load profile.
-        useAuthStore.setState({ token });
-        const res = await api.get('/profile');
-        const user = res.data.data;
+        // Exchange the single-use code for a Sanctum token. The token only
+        // ever travels in the POST response body, never in any URL.
+        const res = await api.post('/auth/google/exchange', { code });
+        const { user, token } = res.data.data;
         setAuth(user, token, user.role);
         toast.success(`Selamat datang, ${user.name}!`);
         router.replace(user.role === 'admin' ? '/admin/dashboard' : '/account');
@@ -55,7 +56,7 @@ function CallbackInner() {
 
 export default function GoogleCallbackPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen grid place-items-center bg-bone"><Loader2 className="w-8 h-8 animate-spin text-ember" /></div>}>
+    <Suspense fallback={<div className="min-h-screen grid place-items-center bg-bone"><Loader2 className="w-8 h-8 animate-spin text-ember mx-auto" /></div>}>
       <CallbackInner />
     </Suspense>
   );
