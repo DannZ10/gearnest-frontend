@@ -5,7 +5,7 @@ import api from '@/lib/axios';
 import { formatRupiah, formatDate } from '@/lib/format';
 import { toast } from 'sonner';
 import AdminShell from '@/components/organisms/AdminShell';
-import { CARD, SKEL, INPUT, SectionHead } from '@/components/admin/ui';
+import { CARD, SKEL, INPUT, SectionHead, AdminSelect, AdminStatusSelect } from '@/components/admin/ui';
 import BookingInvoice from '@/components/organisms/BookingInvoice';
 import BookingActivityModal from '@/components/organisms/BookingActivityModal';
 import { Search, ShieldCheck, ShieldAlert, Pencil, FileText, Activity } from 'lucide-react';
@@ -93,10 +93,16 @@ function AdminBookings() {
             className={`${INPUT} pl-9`}
           />
         </div>
-        <select value={status} onChange={(e) => setStatus(e.target.value)} className={`${INPUT} sm:w-52`}>
-          <option value="">Semua Status</option>
-          {STATUSES.map((s) => <option key={s} value={s} className="capitalize">{s}</option>)}
-        </select>
+        <AdminSelect
+          value={status}
+          onChange={setStatus}
+          options={[
+            { value: '', label: 'Semua Status' },
+            ...STATUSES.map((s) => ({ value: s, label: s })),
+          ]}
+          placeholder="Semua Status"
+          className="sm:w-52"
+        />
       </div>
 
       <section className={`${CARD} p-6`}>
@@ -187,13 +193,12 @@ function AdminBookings() {
                         >
                           <FileText className="w-4 h-4" />
                         </button>
-                        <select
+                        <AdminStatusSelect
                           value={b.status}
-                          onChange={(e) => updateStatus(b.id, e.target.value)}
-                          className="bg-bone dark:bg-[#16261d] border-2 border-ink/15 dark:border-white/15 rounded-md px-2 py-1 text-xs text-ink dark:text-white focus:outline-none focus:border-ember capitalize"
-                        >
-                          {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
-                        </select>
+                          onChange={(newStatus) => updateStatus(b.id, newStatus)}
+                          options={STATUSES}
+                          statusStyleMap={STATUS_STYLE}
+                        />
                       </div>
                     </td>
                   </tr>

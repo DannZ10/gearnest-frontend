@@ -1,38 +1,38 @@
 import React from 'react';
 import Link from 'next/link';
-import { Mountain } from 'lucide-react';
+import Image from 'next/image';
 import { cn } from '@/lib/utils';
 
 /**
- * The Kembara.id brand logo + wordmark.
- * Used in Navbar, Footer, Login portal, and Admin sidebar.
+ * The Kembara.id brand logo — the real brand asset used across the site.
+ * Light surfaces get the full colour lockup (same asset as the landing navbar);
+ * dark surfaces get the wordmark whitened (same treatment as the footer).
+ * Used in the auth screens and the admin sidebar.
  */
-export default function BrandMark({ className, dark = false, showTagline = false }) {
+export default function BrandMark({ className, dark = false }) {
   return (
-    <Link href="/" className={cn('flex items-center gap-2.5 group', className)}>
-      <span
-        className={cn(
-          'grid place-items-center w-10 h-10 rounded-xl shadow-sm transition-transform group-hover:-translate-y-0.5',
-          dark ? 'bg-ember text-ink' : 'bg-ink text-ember'
-        )}
-      >
-        <Mountain className="w-5 h-5" strokeWidth={2.5} />
-      </span>
-      <span className="leading-none">
-        <span
-          className={cn(
-            'font-display font-extrabold text-xl tracking-tight block',
-            dark ? 'text-white' : 'text-ink'
-          )}
-        >
-          Kembara<span className="text-ember">.id</span>
-        </span>
-        {showTagline && (
-          <span className={cn('text-[9px] font-semibold tracking-[0.14em] uppercase', dark ? 'text-ember' : 'text-trail')}>
-            Eksplorasi Alam
-          </span>
-        )}
-      </span>
+    <Link href="/" aria-label="Kembara.id" className={cn('inline-flex items-center group', className)}>
+      {dark ? (
+        <Image
+          src="/img/logo-text.webp"
+          alt="Kembara.id"
+          width={150}
+          height={30}
+          priority
+          className="transition-transform group-hover:-translate-y-0.5"
+          style={{ height: 30, width: 'auto', filter: 'brightness(0) invert(1)' }}
+        />
+      ) : (
+        <Image
+          src="/img/logo-full.webp"
+          alt="Kembara.id"
+          width={130}
+          height={32}
+          priority
+          className="transition-transform group-hover:-translate-y-0.5"
+          style={{ height: 34, width: 'auto' }}
+        />
+      )}
     </Link>
   );
 }

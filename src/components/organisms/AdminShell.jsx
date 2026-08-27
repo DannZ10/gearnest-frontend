@@ -8,7 +8,7 @@ import BrandMark from '@/components/atoms/BrandMark';
 import { useAuthStore } from '@/store/useAuthStore';
 import {
   LayoutDashboard, CalendarCheck, Package, Tags,
-  ExternalLink, LogOut, Shield, Menu, BarChart3, Sun, Moon, Truck, Mountain,
+  ExternalLink, LogOut, Shield, Menu, BarChart3, Sun, Moon, Truck,
 } from 'lucide-react';
 
 const AdminThemeContext = createContext({ isDark: false });
@@ -32,8 +32,8 @@ function SidebarInner({ user, pathname, rail, onLogout, onNavigate }) {
       {/* Brand */}
       <div className={`flex items-center h-16 shrink-0 border-b-2 border-white/10 ${rail ? 'justify-center px-0' : 'px-5'}`}>
         {rail ? (
-          <Link href="/" title="Kembara.id" className="grid place-items-center w-10 h-10 rounded-xl bg-ember text-ink shadow-sm">
-            <Mountain className="w-5 h-5" strokeWidth={2.5} />
+          <Link href="/" title="Kembara.id" className="grid place-items-center">
+            <img src="/img/logo-icon.webp" alt="Kembara.id" className="w-10 h-10 object-contain" />
           </Link>
         ) : (
           <BrandMark dark />

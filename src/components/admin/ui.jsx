@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useEffect } from 'react';
-import { X } from 'lucide-react';
+import React, { useEffect, useState, useRef } from 'react';
+import { createPortal } from 'react-dom';
+import { X, ChevronDown, Check } from 'lucide-react';
 
 export const CARD = 'bg-white dark:bg-[#213026] border-2 border-ink/10 dark:border-white/10 rounded-md';
 export const SKEL = 'bg-bone-2 dark:bg-white/5 animate-pulse rounded-md';
@@ -67,3 +68,149 @@ export function Field({ label, children }) {
     </div>
   );
 }
+
+export function AdminSelect({ value, onChange, options, placeholder = 'Pilih…', className = '' }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const handleClick = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [open]);
+
+  const formattedOptions = options.map((opt) =>
+    typeof opt === 'object' ? opt : { value: opt, label: opt }
+  );
+
+  const selected = formattedOptions.find((o) => String(o.value) === String(value));
+
+  return (
+    <div className={`relative ${className}`} ref={ref}>
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        className={`w-full flex items-center justify-between gap-2 bg-bone dark:bg-[#16261d] border-2 ${
+          open ? 'border-ember ring-2 ring-ember/20' : 'border-ink/15 dark:border-white/15 hover:border-ink/30 dark:hover:border-white/30'
+        } rounded-md px-3 py-2 text-sm text-left transition-all ${
+          selected && selected.value !== '' ? 'text-ink dark:text-white font-medium' : 'text-ink/50 dark:text-sand/50'
+        }`}
+      >
+        <span className="truncate capitalize">{selected ? selected.label : placeholder}</span>
+        <ChevronDown className={`w-4 h-4 text-ink/50 dark:text-sand/50 transition-transform duration-200 ${open ? 'rotate-180 text-ember' : ''}`} />
+      </button>
+
+      {open && (
+        <div className="absolute left-0 right-0 top-full mt-1.5 z-[80] bg-white dark:bg-[#213026] border-2 border-ink/15 dark:border-white/15 rounded-md shadow-xl max-h-56 overflow-y-auto py-1 animate-in fade-in zoom-in-95 duration-100">
+          {formattedOptions.map((opt) => {
+            const isSelected = String(opt.value) === String(value);
+            return (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => {
+                  onChange(opt.value);
+                  setOpen(false);
+                }}
+                className={`w-full flex items-center justify-between gap-2 px-3 py-2 text-sm text-left capitalize transition-colors ${
+                  isSelected
+                    ? 'bg-ember/15 text-ember-2 dark:text-ember font-semibold'
+                    : 'text-ink/80 dark:text-sand hover:bg-bone dark:hover:bg-white/5'
+                }`}
+              >
+                <span className="truncate">{opt.label}</span>
+                {isSelected && <Check className="w-4 h-4 text-ember shrink-0" />}
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export function AdminStatusSelect({ value, onChange, options, statusStyleMap = {} }) {
+  const [open, setOpen] = useState(false);
+  const [pos, setPos] = useState({ top: 0, left: 0 });
+  const btnRef = useRef(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const close = () => setOpen(false);
+    window.addEventListener('scroll', close, true);
+    window.addEventListener('resize', close);
+    return () => {
+      window.removeEventListener('scroll', close, true);
+      window.removeEventListener('resize', close);
+    };
+  }, [open]);
+
+  const toggle = () => {
+    if (open) { setOpen(false); return; }
+    const r = btnRef.current.getBoundingClientRect();
+    setPos({ top: r.bottom + 4, left: Math.max(10, r.right - 140) });
+    setOpen(true);
+  };
+
+  const formattedOptions = options.map((opt) =>
+    typeof opt === 'object' ? opt : { value: opt, label: opt }
+  );
+
+  const selected = formattedOptions.find((o) => String(o.value) === String(value));
+  const badgeStyle = statusStyleMap[value] || 'bg-bone dark:bg-[#16261d] text-ink dark:text-white border-ink/20';
+
+  return (
+    <>
+      <button
+        ref={btnRef}
+        type="button"
+        onClick={toggle}
+        className={`inline-flex items-center gap-1.5 font-mono px-2.5 py-1.5 rounded-md text-xs font-bold border capitalize tracking-wide transition-all hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-ember/40 ${badgeStyle}`}
+      >
+        <span>{selected ? selected.label : value}</span>
+        <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${open ? 'rotate-180' : ''}`} />
+      </button>
+
+      {open && createPortal(
+        <>
+          <div className="fixed inset-0 z-[65]" onClick={() => setOpen(false)} />
+          <div
+            style={{ position: 'fixed', top: pos.top, left: pos.left }}
+            className="w-36 z-[70] rounded-md border-2 border-ink/15 dark:border-white/15 bg-white dark:bg-[#213026] shadow-xl py-1 text-xs font-mono font-medium animate-in fade-in zoom-in-95 duration-100"
+          >
+            {formattedOptions.map((opt) => {
+              const isSelected = String(opt.value) === String(value);
+              const optStyle = statusStyleMap[opt.value] || '';
+              return (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => {
+                    onChange(opt.value);
+                    setOpen(false);
+                  }}
+                  className={`w-full flex items-center justify-between px-3 py-2 text-left capitalize transition-colors ${
+                    isSelected
+                      ? 'bg-ember/15 text-ember-2 dark:text-ember font-bold'
+                      : 'text-ink/80 dark:text-sand hover:bg-bone dark:hover:bg-white/5'
+                  }`}
+                >
+                  <span className="flex items-center gap-1.5">
+                    <span className={`w-2 h-2 rounded-full ${optStyle.split(' ')[0] || 'bg-ink/30'}`} />
+                    {opt.label}
+                  </span>
+                  {isSelected && <Check className="w-3.5 h-3.5 text-ember shrink-0" />}
+                </button>
+              );
+            })}
+          </div>
+        </>,
+        document.body
+      )}
+    </>
+  );
+}
+

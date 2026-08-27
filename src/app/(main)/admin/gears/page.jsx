@@ -6,7 +6,7 @@ import api from '@/lib/axios';
 import { formatRupiah } from '@/lib/format';
 import { toast } from 'sonner';
 import AdminShell from '@/components/organisms/AdminShell';
-import { CARD, SKEL, INPUT, SectionHead, Btn, Modal, Field } from '@/components/admin/ui';
+import { CARD, SKEL, INPUT, SectionHead, Btn, Modal, Field, AdminSelect } from '@/components/admin/ui';
 import { Plus, Pencil, Power, PowerOff, Trash2, MoreVertical, Search, Layers, X } from 'lucide-react';
 
 // Meatball (⋮) row menu. Renders fixed-positioned so it escapes the table's
@@ -144,10 +144,12 @@ function GearForm({ open, onClose, categories, editing, onSaved }) {
     <Modal open={open} onClose={onClose} title={editing ? 'Edit Gear' : 'Tambah Gear'}>
       <form onSubmit={submit} className="space-y-4">
         <Field label="Kategori">
-          <select required value={form.category_id} onChange={(e) => set('category_id', e.target.value)} className={INPUT}>
-            <option value="">Pilih kategori…</option>
-            {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-          </select>
+          <AdminSelect
+            value={form.category_id}
+            onChange={(val) => set('category_id', val)}
+            options={categories.map((c) => ({ value: c.id, label: c.name }))}
+            placeholder="Pilih kategori…"
+          />
         </Field>
         <Field label="Nama Gear">
           <input required value={form.name} onChange={(e) => set('name', e.target.value)} className={INPUT} placeholder="Naturehike Cloud Up 2" />
